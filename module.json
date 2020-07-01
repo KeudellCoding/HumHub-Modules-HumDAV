@@ -1,0 +1,12 @@
+{
+    "id": "humdav",
+    "name": "HumHub DAV Access",
+    "description": "Make all your data available for mobile devices and other interfaces.",
+    "keywords": ["caldav", "carddav", "webdav", "dav", "sabre"],
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "KeudellCoding"
+        }
+    ]
+}
