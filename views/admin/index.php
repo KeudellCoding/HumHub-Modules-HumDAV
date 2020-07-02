@@ -19,8 +19,17 @@ use humhub\widgets\ActiveForm;
         <?php $form = ActiveForm::begin(); ?>
 
         <?= $form->field($model, 'active')->checkbox(); ?>
+        
+        <hr />
 
-        <hr>
+        <?= $form->field($model, 'include_address')->checkbox(); ?>
+        <?= $form->field($model, 'include_profile_image')->checkbox(); ?>
+        <?= $form->field($model, 'include_birthday')->checkbox(); ?>
+        <?= $form->field($model, 'include_gender')->checkbox(); ?>
+        <?= $form->field($model, 'include_phone_numbers')->checkbox(); ?>
+        <?= $form->field($model, 'include_url')->checkbox(); ?>
+
+        <hr />
 
         <?= Html::submitButton("Save", ['class' => 'btn btn-primary', 'data-ui-loader' => '']); ?>
         <a class="btn btn-default" href="<?= Url::to(['/admin/module']); ?>">Back to modules</a>

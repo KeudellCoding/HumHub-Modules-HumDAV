@@ -30,7 +30,7 @@ $server->setBaseUri('/humdav/remote');
 
 // Plugins
 $server->addPlugin(new Sabre\DAV\Auth\Plugin($authBackend));
-//$server->addPlugin(new Sabre\DAV\Browser\Plugin());
+$server->addPlugin(new Sabre\DAV\Browser\Plugin());
 $server->addPlugin(new Sabre\CardDAV\Plugin());
 $server->addPlugin(new Sabre\DAVACL\Plugin());
 
