@@ -8,6 +8,7 @@
 
 namespace humhub\modules\humdav\definitions;
 
+use Yii;
 use humhub\modules\user\models\User;
 use humhub\libs\ProfileImage;
 
