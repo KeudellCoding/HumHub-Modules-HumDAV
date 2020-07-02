@@ -23,6 +23,7 @@ class AuthenticationBackend implements BackendInterface {
      */
     public function check(RequestInterface $request, ResponseInterface $response) {
         $settings = Yii::$app->getModule('humdav')->settings;
+
         if ((boolean)$settings->get('active', false) !== true) {
             return [false, 'Module not activated'];
         }
@@ -33,7 +34,10 @@ class AuthenticationBackend implements BackendInterface {
             return [false, 'Not logged in'];
         }
 
-        //Optional: Check if User is allowed
+        $allowedUsers = array_filter((array)$settings->getSerialized('enabled_users'));
+        if (!in_array($user->guid, $allowedUsers) && !empty($allowedUsers)) {
+            return [false, 'Not allowed'];
+        }
         
         return [true, 'principals/'.$username];
     }

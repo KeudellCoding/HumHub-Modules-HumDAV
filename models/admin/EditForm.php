@@ -13,6 +13,7 @@ use yii\base\Model;
 
 class EditForm extends Model {
     public $active;
+    public $enabled_users;
     public $include_address;
     public $include_profile_image;
     public $include_birthday;
@@ -26,7 +27,7 @@ class EditForm extends Model {
      */
     public function rules() {
         return [
-            [['active'], 'safe'],
+            [['active', 'enabled_users'], 'safe'],
             [['include_address', 'include_profile_image', 'include_birthday', 'include_gender', 'include_phone_numbers', 'include_url', 'enable_browser_plugin'], 'boolean'],
         ];
     }
@@ -38,7 +39,7 @@ class EditForm extends Model {
         $settings = Yii::$app->getModule('humdav')->settings;
         $this->active = $settings->get('active', false);
 
-        $this->active = $settings->get('active', false);
+        $this->enabled_users = (array)$settings->getSerialized('enabled_users');
 
         $this->include_address = $settings->get('include_address', true);
         $this->include_profile_image = $settings->get('include_profile_image', true);
@@ -51,14 +52,21 @@ class EditForm extends Model {
     }
 
     /**
-     * Declares customized attribute labels.
-     * If not declared here, an attribute would have a label that is
-     * the same as its name with the first letter in upper case.
+     * @inheritdocs
      */
     public function attributeLabels() {
         return [
-            'active' => 'Enable Access',
+            'active' => 'Enable Module',
             'enable_browser_plugin' => 'Enable Browser Access (not recommended)'
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeHints() {
+        return [
+            'enabled_users' => 'If empty, all users have access.'
         ];
     }
 
@@ -68,6 +76,8 @@ class EditForm extends Model {
     public function save() {
         $settings = Yii::$app->getModule('humdav')->settings;
         $settings->set('active', (boolean) $this->active);
+
+        $settings->setSerialized('enabled_users', (array)$this->enabled_users);
 
         $settings->set('include_address', (boolean) $this->include_address);
         $settings->set('include_profile_image', (boolean) $this->include_profile_image);

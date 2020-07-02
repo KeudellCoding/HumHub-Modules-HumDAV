@@ -9,6 +9,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use humhub\widgets\ActiveForm;
+use humhub\modules\user\widgets\UserPickerField;
 
 ?>
 
@@ -20,6 +21,10 @@ use humhub\widgets\ActiveForm;
 
         <?= $form->field($model, 'active')->checkbox(); ?>
         
+        <hr />
+
+        <?= $form->field($model, 'enabled_users')->widget(UserPickerField::class); ?>
+
         <hr />
 
         <?= $form->field($model, 'include_address')->checkbox(); ?>
