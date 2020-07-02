@@ -31,6 +31,10 @@ use humhub\widgets\ActiveForm;
 
         <hr />
 
+        <?= $form->field($model, 'enable_browser_plugin')->checkbox(); ?>
+
+        <hr />
+
         <?= Html::submitButton("Save", ['class' => 'btn btn-primary', 'data-ui-loader' => '']); ?>
         <a class="btn btn-default" href="<?= Url::to(['/admin/module']); ?>">Back to modules</a>
 

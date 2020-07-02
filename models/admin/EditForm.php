@@ -19,6 +19,7 @@ class EditForm extends Model {
     public $include_gender;
     public $include_phone_numbers;
     public $include_url;
+    public $enable_browser_plugin;
 
     /**
      * @inheritdocs
@@ -26,7 +27,7 @@ class EditForm extends Model {
     public function rules() {
         return [
             [['active'], 'safe'],
-            [['include_address', 'include_profile_image', 'include_birthday', 'include_gender', 'include_phone_numbers', 'include_url'], 'boolean'],
+            [['include_address', 'include_profile_image', 'include_birthday', 'include_gender', 'include_phone_numbers', 'include_url', 'enable_browser_plugin'], 'boolean'],
         ];
     }
 
@@ -45,6 +46,8 @@ class EditForm extends Model {
         $this->include_gender = $settings->get('include_gender', true);
         $this->include_phone_numbers = $settings->get('include_phone_numbers', true);
         $this->include_url = $settings->get('include_url', true);
+
+        $this->enable_browser_plugin = $settings->get('enable_browser_plugin', false);
     }
 
     /**
@@ -54,7 +57,8 @@ class EditForm extends Model {
      */
     public function attributeLabels() {
         return [
-            'active' => 'Enable Access'
+            'active' => 'Enable Access',
+            'enable_browser_plugin' => 'Enable Browser Access (not recommended)'
         ];
     }
 
@@ -71,6 +75,8 @@ class EditForm extends Model {
         $settings->set('include_gender', (boolean) $this->include_gender);
         $settings->set('include_phone_numbers', (boolean) $this->include_phone_numbers);
         $settings->set('include_url', (boolean) $this->include_url);
+
+        $settings->set('enable_browser_plugin', (boolean) $this->enable_browser_plugin);
 
         return true;
     }

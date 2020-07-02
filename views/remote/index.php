@@ -13,6 +13,8 @@ use humhub\modules\humdav\components\sabre\AuthenticationBackend;
 use humhub\modules\humdav\components\sabre\CardDavBackend;
 use humhub\modules\humdav\components\sabre\PrincipalBackend;
 
+$settings = Yii::$app->getModule('humdav')->settings;
+
 //Backends
 $authBackend = new AuthenticationBackend();
 $principalBackend = new PrincipalBackend();
@@ -30,7 +32,9 @@ $server->setBaseUri('/humdav/remote');
 
 // Plugins
 $server->addPlugin(new Sabre\DAV\Auth\Plugin($authBackend));
-$server->addPlugin(new Sabre\DAV\Browser\Plugin());
+if ((boolean)$settings->get('enable_browser_plugin', false) === true) {
+    $server->addPlugin(new Sabre\DAV\Browser\Plugin());
+}
 $server->addPlugin(new Sabre\CardDAV\Plugin());
 $server->addPlugin(new Sabre\DAVACL\Plugin());
 
