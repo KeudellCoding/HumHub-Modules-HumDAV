@@ -9,11 +9,30 @@
 namespace humhub\modules\humdav\models;
 
 abstract class AddressBook {
-    public int $Id;
-    public string $Uri;
-    public string $DisplayName;
-    public string $Description;
-    public int $SyncToken = 1;
+    /**
+     * @var int
+     */
+    public $Id;
+
+    /**
+     * @var string
+     */
+    public $Uri;
+
+    /**
+     * @var string
+     */
+    public $DisplayName;
+
+    /**
+     * @var string
+     */
+    public $Description;
+
+    /**
+     * @var int
+     */
+    public $SyncToken = 1;
 
     abstract public function getUsers();
 }

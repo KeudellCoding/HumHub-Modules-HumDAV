@@ -15,11 +15,11 @@ use humhub\modules\user\models\Follow;
 use humhub\modules\humdav\models\AddressBook;
 
 class FollowingAddressBook extends AddressBook {
-    public int $Id = 1;
-    public string $Uri = 'following';
-    public string $DisplayName = 'Following';
-    public string $Description = 'All users you are following';
-    public int $SyncToken = 1;
+    public $Id = 1;
+    public $Uri = 'following';
+    public $DisplayName = 'Following';
+    public $Description = 'All users you are following';
+    public $SyncToken = 1;
 
     public function getUsers() {
         list($username) = Yii::$app->request->getAuthCredentials();
