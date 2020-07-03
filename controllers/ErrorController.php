@@ -14,6 +14,6 @@ use humhub\modules\humdav\components\BaseController;
 
 class ErrorController extends BaseController {
     public function actionNotfound() {
-        throw new NotFoundHttpException('The requested page does not exist.'.$_SERVER['REQUEST_URI']);
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }
