@@ -10,9 +10,9 @@ namespace humhub\modules\humdav\controllers;
 
 use Yii;
 use yii\web\NotFoundHttpException;
-use humhub\modules\humdav\components\BaseController;
+use humhub\components\Controller;
 
-class ErrorController extends BaseController {
+class ErrorController extends Controller {
     public function actionNotfound() {
         throw new NotFoundHttpException('The requested page does not exist.');
     }

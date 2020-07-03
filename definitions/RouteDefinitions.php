@@ -14,6 +14,8 @@ class RouteDefinitions {
             ['pattern' => 'humdav/remote', 'route' => 'humdav/remote'],
             ['pattern' => 'humdav/remote/<tmpParam:.*>', 'route' => 'humdav/remote'],
 
+            ['pattern' => 'humdav/generate/mobileconfig', 'route' => 'humdav/generate/mobileconfig', 'verb' => ['GET']],
+
             // Config
             ['pattern' => 'humdav/admin/index', 'route' => 'humdav/admin', 'verb' => ['POST', 'GET']],
 
