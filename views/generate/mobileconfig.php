@@ -6,13 +6,7 @@
  * @author KeudellCoding
  */
 
-use yii\web\ForbiddenHttpException;
 use humhub\modules\humdav\components\UUIDHelper;
-
-$currentIdentity = Yii::$app->user->identity;
-if ($currentIdentity === null) {
-    throw new ForbiddenHttpException('You\'re not signed in.');
-}
 
 $secureRequests = Yii::$app->request->getIsSecureConnection() ? 'true': 'false';
 

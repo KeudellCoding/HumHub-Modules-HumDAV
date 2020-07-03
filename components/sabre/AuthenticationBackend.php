@@ -22,18 +22,13 @@ class AuthenticationBackend implements BackendInterface {
      * @inheritdoc
      */
     public function check(RequestInterface $request, ResponseInterface $response) {
-        $settings = Yii::$app->getModule('humdav')->settings;
-
-        if ((boolean)$settings->get('active', false) !== true) {
-            die('Module not activated');
-        }
-
         list($username, $password) = Yii::$app->request->getAuthCredentials();
         $user = self::getUserByCredentials($username, $password);
         if ($user === null) {
             return [false, 'Not logged in'];
         }
 
+        $settings = Yii::$app->getModule('humdav')->settings;
         $allowedUsers = array_filter((array)$settings->getSerialized('enabled_users'));
         if (!in_array($user->guid, $allowedUsers) && !empty($allowedUsers)) {
             return [false, 'Not allowed'];
@@ -46,11 +41,6 @@ class AuthenticationBackend implements BackendInterface {
      * @inheritdoc
      */
     public function challenge(RequestInterface $request, ResponseInterface $response) {
-        $settings = Yii::$app->getModule('humdav')->settings;
-        if ((boolean)$settings->get('active', false) !== true) {
-            die('Module not activated');
-        }
-
         header('WWW-Authenticate: Basic realm="HumDAV"');
         header('HTTP/1.0 401 Unauthorized');
         die;

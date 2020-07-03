@@ -16,6 +16,8 @@ class RouteDefinitions {
 
             ['pattern' => 'humdav/generate/mobileconfig', 'route' => 'humdav/generate/mobileconfig', 'verb' => ['GET']],
 
+            ['pattern' => 'humdav/accessinfos', 'route' => 'humdav/directory/accessinfos', 'verb' => ['GET']],
+
             // Config
             ['pattern' => 'humdav/admin/index', 'route' => 'humdav/admin', 'verb' => ['POST', 'GET']],
 
