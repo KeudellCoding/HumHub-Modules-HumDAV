@@ -46,7 +46,7 @@ $mobileconfig = '<?xml version="1.0" encoding="UTF-8"?>
 			<key>PayloadType</key>
 			<string>com.apple.carddav.account</string>
 			<key>PayloadUUID</key>
-			<string>'.UUIDHelper::generateNew().'</string>
+			<string>'.UUIDHelper::generateNewFromStrings('CardDAV', Yii::$app->settings->get('name'), $currentIdentity->username, 'HumDAV').'</string>
 			<key>PayloadVersion</key>
 			<integer>1</integer>
 		</dict>
@@ -64,7 +64,7 @@ $mobileconfig = '<?xml version="1.0" encoding="UTF-8"?>
 	<key>PayloadType</key>
 	<string>Configuration</string>
 	<key>PayloadUUID</key>
-	<string>'.UUIDHelper::generateNew().'</string>
+	<string>'.UUIDHelper::generateNewFromStrings(Yii::$app->settings->get('name'), $currentIdentity->username, 'HumDAV').'</string>
 	<key>PayloadVersion</key>
 	<integer>1</integer>
 </dict>
