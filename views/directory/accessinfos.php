@@ -25,7 +25,7 @@ use humhub\modules\directory\widgets\Menu;
                     <p>
                         If you visit this page with an iPad or iPhone, you can download an automatically generated configuration file here:
                         <br>
-                        <a href="<?=Url::to(['/humdav/generate/mobileconfig'])?>" target="_blank">Download iOS Configuration File</a>
+                        <a class="btn btn-default" href="<?= Url::to(['/humdav/generate/mobileconfig']); ?>" target="_blank">Download iOS Configuration File</a>
                     </p>
                     <hr>
                     <p>
