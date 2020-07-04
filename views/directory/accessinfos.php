@@ -43,6 +43,9 @@ use humhub\modules\directory\widgets\Menu;
                             <dt>Password:</dt>
                             <dd><i>Your HumHub Password</i></dd>
 
+                            <dt>Auth Type:</dt>
+                            <dd>Basic</dd>
+
                             <dt>Email:</dt>
                             <dd><?=Yii::$app->user->identity->email?></dd>
                         </dl>
