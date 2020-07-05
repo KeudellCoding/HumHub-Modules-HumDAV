@@ -3,7 +3,8 @@
     "name": "HumHub DAV Access",
     "description": "Make all your data available for mobile devices and other interfaces.",
     "keywords": ["caldav", "carddav", "webdav", "dav", "sabre"],
-    "version": "1.0.0",
+    "version": "0.1.0",
+    "homepage": "https://github.com/KeudellCoding/HumHub-Modules-HumDAV",
     "authors": [
         {
             "name": "KeudellCoding"
