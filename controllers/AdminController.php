@@ -33,6 +33,6 @@ class AdminController extends Controller {
         if (!empty($gitAvailable)) {
             exec('cd '.__DIR__.' && cd .. && git pull origin master');
         }
-        return $this->redirect(Url::to(['/usermap/admin/index']));
+        return $this->redirect(Url::to(['/humdav/admin/index']));
     }
 }
