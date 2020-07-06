@@ -20,6 +20,7 @@ class RouteDefinitions {
 
             // Config
             ['pattern' => 'humdav/admin/index', 'route' => 'humdav/admin', 'verb' => ['POST', 'GET']],
+            ['pattern' => 'humdav/admin/update', 'route' => 'humdav/admin/update', 'verb' => ['POST', 'GET']],
 
             // Catch all to ensure verbs
             ['pattern' => 'humdav/<tmpParam:.*>', 'route' => 'humdav/error/notfound']
