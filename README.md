@@ -4,6 +4,12 @@ HumHub module for external access to e.g. the contacts over the CardDAV protocol
 ## Requirements
 - Make sure HumHub URL Rewriting is enabled on your installation (https://docs.humhub.org/docs/admin/installation#pretty-urls)
 
+## Installation
+- Navigate to the folder "\protected\modules".
+- Execute the command "git clone https://github.com/KeudellCoding/HumHub-Modules-HumDAV".
+- If the module does not appear directly in the module list, you can empty the cache.
+- Configure the module.
+
 ## Access
 - Two address books are automatically created for each user.
 - The URL is organized as follows:
