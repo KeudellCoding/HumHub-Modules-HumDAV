@@ -43,6 +43,7 @@ use humhub\modules\user\widgets\UserPickerField;
         <?= Html::submitButton("Save", ['class' => 'btn btn-primary', 'data-ui-loader' => '']); ?>
         <a class="btn btn-default" href="<?= Url::to(['/admin/module']); ?>">Back to modules</a>
         <a class="btn btn-warning" href="<?= Url::to(['/humdav/admin/update']); ?>" data-ui-loader="">Pull module update</a>
+        <a>Current Version: <?= $version_infos['local_version']; ?>, Online Version: <?= $version_infos['github_version']; ?></a>
 
         <?php ActiveForm::end(); ?>
     </div>

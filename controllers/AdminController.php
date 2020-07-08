@@ -25,7 +25,12 @@ class AdminController extends Controller {
             return $this->redirect(Url::to(['/humdav/admin/index']));
         }
 
-        return $this->render('index', ['model' => $form]);
+        $versionInfos = [
+            'local_version' => Yii::$app->getModule('usermap')->version,
+            'github_version' => $this->getGitHubVersion()
+        ];
+
+        return $this->render('index', ['model' => $form, 'version_infos' => $versionInfos]);
     }
 
     public function actionUpdate() {
@@ -34,5 +39,14 @@ class AdminController extends Controller {
             exec('cd '.__DIR__.' && cd .. && git pull origin master');
         }
         return $this->redirect(Url::to(['/humdav/admin/index']));
+    }
+
+    private function getGitHubVersion() {
+        $rawConfigJson = file_get_contents('https://raw.githubusercontent.com/KeudellCoding/HumHub-Modules-HumDAV/master/module.json');
+        if (!empty($rawConfigJson)) {
+            $configJson = json_decode($rawConfigJson, true);
+            return $configJson['version'];
+        }
+        return null;
     }
 }
