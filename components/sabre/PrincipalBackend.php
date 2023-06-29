@@ -8,7 +8,6 @@
 
 namespace humhub\modules\humdav\components\sabre;
 
-use Sabre\Uri;
 use Sabre\DAV\PropPatch;
 use Sabre\DAVACL\PrincipalBackend\AbstractBackend;
 use humhub\modules\user\models\User;
@@ -16,10 +15,22 @@ use humhub\modules\user\models\User;
 class PrincipalBackend extends AbstractBackend {
     private static function getUserPrincipal(User $user) {
         return [
-            'id' => $user->id,
+            'id' => strval($user->id),
 			'uri' => 'principals/' . $user->guid,
             '{DAV:}displayname' => $user->displayName,
             '{http://sabredav.org/ns}email-address' => $user->email
+        ];
+    }
+    private static function getUserChildPrincipals(User $user) {
+        return [
+            'calendar-proxy-read' => [
+                'id' => strval($user->id) . '-calendar-proxy-read',
+                'uri' => 'principals/' . $user->guid . '/calendar-proxy-read'
+            ],
+            'calendar-proxy-write'  => [
+                'id' => $user->id . 'calendar-proxy-write',
+                'uri' => 'principals/' . $user->guid . '/calendar-proxy-write'
+            ]
         ];
     }
 
@@ -27,13 +38,17 @@ class PrincipalBackend extends AbstractBackend {
      * @inheritdoc
      */
     public function getPrincipalsByPrefix($prefixPath) {
-        $results = [];
+        $principals = [];
 
-        if ($prefixPath === 'principals') {
-            foreach (User::findAll(['user.status' => User::STATUS_ENABLED]) as $user) {
-                $results[] = self::getUserPrincipal($user);
-            }
+        foreach (User::findAll(['user.status' => User::STATUS_ENABLED]) as $user) {
+            $principals[] = self::getUserPrincipal($user);
+            array_push($principals, ...array_values(self::getUserChildPrincipals($user)));
         }
+
+        $results = array_filter($principals, function($principal) use ($prefixPath) {
+            if (!isset($principal['uri'])) return false;
+            return str_starts_with($principal['uri'], $prefixPath);
+        });
 
         return $results;
     }
@@ -42,11 +57,22 @@ class PrincipalBackend extends AbstractBackend {
      * @inheritdoc
      */
     public function getPrincipalByPath($path) {
-        list($prefix, $guid) = Uri\split($path);
+        $prefixParts = explode('/', $path, 3);
+        if (count($prefixParts) < 2) {
+            return null;
+        }
 
-        if ($prefix === 'principals') {
-            $user = User::findByGuid($guid);
+        if ($prefixParts[0] === 'principals') {
+            $user = User::findByGuid($prefixParts[1]);
             if ($user !== null) {
+
+                if (isset($prefixParts[2])) {
+                    $userChildPrincipals = self::getUserChildPrincipals($user);
+                    if (isset($userChildPrincipals[$prefixParts[2]])) {
+                        return $userChildPrincipals[$prefixParts[2]];
+                    }
+                }
+                
 				return self::getUserPrincipal($user);
             }
         }

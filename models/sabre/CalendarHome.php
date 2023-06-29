@@ -18,19 +18,17 @@ class CalendarHome extends \Sabre\CalDAV\CalendarHome {
                 'privilege' => '{DAV:}read',
                 'principal' => $this->principalInfo['uri'],
                 'protected' => true
-            ]
+            ],
+            [
+                'privilege' => '{DAV:}read',
+                'principal' => $this->principalInfo['uri'].'/calendar-proxy-write',
+                'protected' => true,
+            ],
+            [
+                'privilege' => '{DAV:}read',
+                'principal' => $this->principalInfo['uri'].'/calendar-proxy-read',
+                'protected' => true,
+            ],
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    function getChildren() {
-        $calendars = $this->caldavBackend->getCalendarsForUser($this->principalInfo['uri']);
-        $objs = [];
-        foreach ($calendars as $calendar) {
-            $objs[] = new Calendar($this->caldavBackend, $calendar);
-        }
-        return $objs;
     }
 }

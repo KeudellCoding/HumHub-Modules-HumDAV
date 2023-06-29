@@ -15,7 +15,6 @@ use humhub\modules\humdav\models\UserSettingsEditForm;
 use humhub\modules\humdav\models\UserToken;
 use humhub\modules\humdav\models\UserTokenSearch;
 use humhub\modules\space\models\Membership;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\web\BadRequestHttpException;

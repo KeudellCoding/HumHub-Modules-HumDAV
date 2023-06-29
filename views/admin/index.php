@@ -54,6 +54,7 @@ use humhub\modules\humdav\models\admin\EditForm;
             <li><?=Url::to(['/.well-known/carddav'], true)?> &rarr; <?=Url::to(['/humdav/remote'], true)?></li>
             <li><?=Url::to(['/.well-known/caldav'], true)?> &rarr; <?=Url::to(['/humdav/remote'], true)?></li>
         </ul>
+        <a href="https://sabre.io/dav/service-discovery/" target="_blank" rel="noopener noreferrer">Further infos</a>
 
         <hr />
 

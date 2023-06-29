@@ -8,17 +8,19 @@
 
 namespace humhub\modules\humdav\models\sabre;
 
-class Principal extends \Sabre\DAVACL\Principal {
+class Principal extends \Sabre\CalDAV\Principal\User {
     /**
      * @inheritdoc
      */
     function getACL() {
-        return [
-            [
-                'privilege' => '{DAV:}read',
-                'principal' => '{DAV:}owner',
-                'protected' => true,
-            ]
-        ];
+        $acls = parent::getACL();
+
+        foreach ($acls as $aclKey => $acl) {
+            if ($acl['principal'] === '{DAV:}owner') {
+                $acls[$aclKey]['privilege'] = '{DAV:}read';
+            }
+        }
+
+        return $acls;
     }
 }

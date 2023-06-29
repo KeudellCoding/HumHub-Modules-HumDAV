@@ -8,7 +8,7 @@
 
 namespace humhub\modules\humdav\models\sabre;
 
-class PrincipalCollection extends \Sabre\DAVACL\PrincipalCollection {
+class PrincipalCollection extends \Sabre\CalDAV\Principal\Collection {
     /**
      * @inheritdoc
      */

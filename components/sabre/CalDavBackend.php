@@ -11,7 +11,6 @@ namespace humhub\modules\humdav\components\sabre;
 use humhub\modules\humdav\definitions\VCalDefinitions;
 use humhub\modules\space\models\Membership;
 use Yii;
-use Sabre\Uri;
 use Sabre\CalDAV\Backend\AbstractBackend;
 use humhub\modules\user\models\User;
 
@@ -22,12 +21,15 @@ class CalDavBackend extends AbstractBackend {
     public function getCalendarsForUser($principalUri) {
         if (Yii::$app->getModule('calendar') === null) return [];
 
-        list($prefix, $guid) = Uri\split($principalUri);
-        if ($prefix !== 'principals') return [];
 
-        $user = User::findByGuid($guid);
+        $prefixParts = explode('/', $principalUri, 3);
+        if (count($prefixParts) < 2) return [];
+        if ($prefixParts[0] !== 'principals') return [];
+
+        $user = User::findByGuid($prefixParts[1]);
         if ($user === null) return [];
 
+        $calendarOrder = 0;
         $results = [];
 
         if ($user->moduleManager->isEnabled('calendar')) {
@@ -36,7 +38,10 @@ class CalDavBackend extends AbstractBackend {
                 'uri' => 'personal',
                 'principaluri' => $principalUri,
                 '{DAV:}displayname' => 'Profile calendar',
-                '{http://sabredav.org/ns}read-only' => 1
+                '{http://sabredav.org/ns}read-only' => 1,
+                '{http://apple.com/ns/ical/}calendar-order' => $calendarOrder++,
+                '{http://calendarserver.org/ns/}getctag' => 'http://sabre.io/ns/sync/0',
+                '{http://sabredav.org/ns}sync-token' => '0'
             ];
         }
 
@@ -50,7 +55,10 @@ class CalDavBackend extends AbstractBackend {
                 'uri' => 'space_'.$space->url,
                 'principaluri' => $principalUri,
                 '{DAV:}displayname' => $space->getDisplayName(),
-                '{http://sabredav.org/ns}read-only' => 1
+                '{http://sabredav.org/ns}read-only' => 1,
+                '{http://apple.com/ns/ical/}calendar-order' => $calendarOrder++,
+                '{http://calendarserver.org/ns/}getctag' => 'http://sabre.io/ns/sync/0',
+                '{http://sabredav.org/ns}sync-token' => '0'
             ];
         }
 
@@ -61,21 +69,21 @@ class CalDavBackend extends AbstractBackend {
      * @inheritdoc
      */
     public function createCalendar($principalUri, $calendarUri, array $properties) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
      * @inheritdoc
      */
     public function updateCalendar($calendarId, \Sabre\DAV\PropPatch $propPatch) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
      * @inheritdoc
      */
     public function deleteCalendar($calendarId) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
@@ -118,20 +126,20 @@ class CalDavBackend extends AbstractBackend {
      * @inheritdoc
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
      * @inheritdoc
      */
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
      * @inheritdoc
      */
     public function deleteCalendarObject($calendarId, $objectUri) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 }

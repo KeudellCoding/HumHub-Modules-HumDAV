@@ -74,21 +74,21 @@ class CardDavBackend extends AbstractBackend {
      * @inheritdoc
      */
     public function updateAddressBook($addressBookId, PropPatch $propPatch) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
      * @inheritdoc
      */
     public function createAddressBook($principalUri, $url, array $properties) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
      * @inheritdoc
      */
     public function deleteAddressBook($addressBookId) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
@@ -143,21 +143,21 @@ class CardDavBackend extends AbstractBackend {
      * @inheritdoc
      */
     public function createCard($addressBookId, $cardUri, $cardData) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
      * @inheritdoc
      */
     public function updateCard($addressBookId, $cardUri, $cardData) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     /**
      * @inheritdoc
      */
     public function deleteCard($addressBookId, $cardUri) {
-        throw new \Sabre\DAV\Exception\BadRequest('Not implemented yet!');
+        throw new \Sabre\DAV\Exception\Forbidden('Not implemented yet!');
     }
 
     // ==================================================================================================================

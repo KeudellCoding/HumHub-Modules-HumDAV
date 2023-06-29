@@ -15,6 +15,7 @@ use humhub\components\Response;
 use humhub\components\Controller;
 use humhub\components\access\ControllerAccess;
 use humhub\modules\calendar\models\CalendarEntry;
+use humhub\modules\humdav\components\sabre\AppleQuirksPlugin;
 use humhub\modules\humdav\components\sabre\PrincipalBackend;
 use humhub\modules\humdav\components\sabre\CardDavBackend;
 use humhub\modules\humdav\components\sabre\CalDavBackend;
@@ -82,6 +83,8 @@ class RemoteController extends Controller {
         $server->setBaseUri('/humdav/remote');
 
         // Plugins
+        $server->addPlugin(new AppleQuirksPlugin());
+
         $server->addPlugin(new \Sabre\DAV\Auth\Plugin($authBackend));
 
         $aclPlugin = new \Sabre\DAVACL\Plugin();
@@ -96,7 +99,7 @@ class RemoteController extends Controller {
             $server->addPlugin(new \Sabre\DAV\Browser\Plugin());
         }
         
-        $server->exec();
+        $server->start();
         exit(0);
     }
 
