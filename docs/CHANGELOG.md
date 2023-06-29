@@ -1,11 +1,14 @@
 Changelog
 =========
 
+1.5.2 (June 29, 2023)  TODO
+----------------------
+- Fix: Calendar errors on macOS
+
 1.5.1 (June 29, 2023)
 ----------------------
 - Fix: Error when calling mobileconfig if the server manages the files case sensitive.
 - Fix: On some systems, the inline script for generating the iCal address is rejected.
-- Fix: Calendar errors on macOS
 
 1.5.0 (June 26, 2023)
 ----------------------
