@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Sabre\Event;
 
 use Generator;
-use Throwable;
 
 /**
  * Turn asynchronous promise-based code into something that looks synchronous
@@ -42,10 +41,10 @@ use Throwable;
  *
  * });
  *
- * @return \Sabre\Event\Promise
- *
  * @psalm-template TReturn
- * @psalm-param callable():\Generator<mixed, mixed, mixed, TReturn> $gen
+ *
+ * @psalm-param callable():Generator<mixed, mixed, mixed, TReturn> $gen
+ *
  * @psalm-return Promise<TReturn>
  *
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
@@ -55,7 +54,7 @@ use Throwable;
 function coroutine(callable $gen): Promise
 {
     $generator = $gen();
-    if (!$generator instanceof Generator) {
+    if (!$generator instanceof \Generator) {
         throw new \InvalidArgumentException('You must pass a generator function');
     }
 
@@ -75,11 +74,11 @@ function coroutine(callable $gen): Promise
                         $generator->send($value);
                         $advanceGenerator();
                     },
-                    function (Throwable $reason) use ($generator, $advanceGenerator) {
+                    function (\Throwable $reason) use ($generator, $advanceGenerator) {
                         $generator->throw($reason);
                         $advanceGenerator();
                     }
-                )->otherwise(function (Throwable $reason) use ($promise) {
+                )->otherwise(function (\Throwable $reason) use ($promise) {
                     // This error handler would be called, if something in the
                     // generator throws an exception, and it's not caught
                     // locally.
@@ -88,10 +87,9 @@ function coroutine(callable $gen): Promise
                 // We need to break out of the loop, because $advanceGenerator
                 // will be called asynchronously when the promise has a result.
                 break;
-            } else {
-                // If the value was not a promise, we'll just let it pass through.
-                $generator->send($yieldedValue);
             }
+            // If the value was not a promise, we'll just let it pass through.
+            $generator->send($yieldedValue);
         }
 
         // If the generator is at the end, and we didn't run into an exception,
@@ -104,7 +102,7 @@ function coroutine(callable $gen): Promise
             if ($returnValue instanceof Promise) {
                 $returnValue->then(function ($value) use ($promise) {
                     $promise->fulfill($value);
-                }, function (Throwable $reason) use ($promise) {
+                }, function (\Throwable $reason) use ($promise) {
                     $promise->reject($reason);
                 });
             } else {
@@ -115,7 +113,7 @@ function coroutine(callable $gen): Promise
 
     try {
         $advanceGenerator();
-    } catch (Throwable $e) {
+    } catch (\Throwable $e) {
         $promise->reject($e);
     }
 

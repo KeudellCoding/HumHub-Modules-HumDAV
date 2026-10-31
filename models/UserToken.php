@@ -15,10 +15,6 @@ use humhub\modules\user\models\User;
 use Yii;
 
 class UserToken extends ActiveRecord {
-    CONST USED_FOR_NOTHING = 0;
-    const USED_FOR_DAV = 1;
-    const USED_FOR_ICAL = 2;
-
     public $defaultAlgorithm = '';
 
     /**
@@ -62,11 +58,17 @@ class UserToken extends ActiveRecord {
      */
     public function rules() {
         return [
-            [['user_id', 'used_for'], 'integer'],
+            [['user_id'], 'integer'],
             [['algorithm'], 'string', 'max' => 20],
-            [['name', 'token', 'salt'], 'string'],
-            [['name', 'used_for'], 'safe'],
-            [['user_id', 'name', 'used_for'], 'required']
+            [['name'], 'string', 'max' => 255],
+            [['token', 'salt'], 'string'],
+            [['user_id', 'name', 'algorithm', 'token', 'salt'], 'required']
+        ];
+    }
+
+    public function scenarios() {
+        return [
+            self::SCENARIO_DEFAULT => ['name', '!user_id', '!algorithm', '!token', '!salt'],
         ];
     }
 
@@ -81,7 +83,6 @@ class UserToken extends ActiveRecord {
             'algorithm' => 'Algorithm',
             'token' => 'Token',
             'salt' => 'Salt',
-            'used_for' => 'Used For',
             'last_time_used' => 'Last Time Used',
             'last_time_used_by_ip' => 'Last Time Used by IP',
             'last_time_used_by_user_agent' => 'Last Time Used by User Agent',
@@ -154,9 +155,9 @@ class UserToken extends ActiveRecord {
         return $this->user_id === Yii::$app->user->id;
     }
 
-    public static function validateTokenForUser(User $user, string $token, int $usedFor) {
+    public static function validateTokenForUser(User $user, string $token) {
         $settings = Yii::$app->getModule('humdav')->settings;
-        if ((boolean)$settings->get('active', false) !== true) return false;
+        if ((bool)$settings->get('active', false) !== true) return false;
         $allowedUsers = array_filter((array)$settings->getSerialized('enabled_users'));
         if (!in_array($user->guid, $allowedUsers) && !empty($allowedUsers)) return false;
 
@@ -164,7 +165,6 @@ class UserToken extends ActiveRecord {
             ->joinWith('user')
             ->where([
                 'user_id' => $user->id,
-                'used_for' => $usedFor,
                 'user.status' => User::STATUS_ENABLED
             ])->all();
 

@@ -10,7 +10,6 @@ namespace humhub\modules\humdav\definitions;
 
 use Yii;
 use humhub\modules\user\models\User;
-use humhub\libs\ProfileImage;
 use humhub\modules\space\models\Membership;
 use humhub\modules\space\models\Space;
 use humhub\modules\user\models\Follow;
@@ -21,12 +20,14 @@ class VCardDefinitions {
         $settings = Yii::$app->getModule('humdav')->settings;
 
         $profile = $user->profile;
+        if ($profile === null) {
+            return null;
+        }
 
-        $vCard = new VCard(['UID' => $user->guid, 'KIND' => 'individual']);
-        $vCard->convert(VCard::VCARD40);
+        $vCard = new VCard(['VERSION' => '4.0', 'UID' => $user->guid, 'KIND' => 'individual']);
 
 
-        $vCard->add('FN', $user->displayname);
+        $vCard->add('FN', $user->displayName);
         $vCard->add('N', [
             $profile->lastname,     // Family Names (also known as surnames)
             $profile->firstname,    // Given Names
@@ -47,7 +48,7 @@ class VCardDefinitions {
         $vCard->add('CATEGORIES', $categories);
 
 
-        if ((boolean)$settings->get('include_address', true) === true) {  // Adding Address
+        if ((bool)$settings->get('include_address', true) === true) {  // Adding Address
             $vCard->add('ADR', [
                 null,               // post office box
                 null,               // extended address (e.g., apartment or suite number)
@@ -60,15 +61,15 @@ class VCardDefinitions {
         }
 
 
-        if ((boolean)$settings->get('include_profile_image', true) === true) {  // Add Profile Image
-            $profileImage = new ProfileImage($user->guid);
-            if ($profileImage->hasImage()) {
-                $vCard->add('PHOTO', $profileImage->getUrl('', true));
+        if ((bool)$settings->get('include_profile_image', true) === true) {  // Add Profile Image
+            $profileImage = $user->getImage();
+            if ($profileImage->exists()) {
+                $vCard->add('PHOTO', $profileImage->getUrl([], true));
             }
         }
 
 
-        if ((boolean)$settings->get('include_gender', true) === true) {  // Add Gender
+        if ((bool)$settings->get('include_gender', true) === true) {  // Add Gender
             if (!empty($profile->gender)) {
                 if ($profile->gender === 'male') $vCard->add('GENDER', 'M');
                 else if ($profile->gender === 'female') $vCard->add('GENDER', 'F');
@@ -77,23 +78,25 @@ class VCardDefinitions {
         }
 
 
-        if ((boolean)$settings->get('include_birthday', true) === true) {  // Add Birthday
+        if ((bool)$settings->get('include_birthday', true) === true) {  // Add Birthday
             if (!empty($profile->birthday)) {
                 $bdayDateTime = date_create_from_format('Y-m-d', $profile->birthday);
-                $bdayFormated = $profile->birthday_hide_year ? $bdayDateTime->format('--md') : $bdayDateTime->format('Ymd');
-                $vCard->add('BDAY', $bdayFormated);
+                if ($bdayDateTime !== false) {
+                    $bdayFormated = $profile->birthday_hide_year ? $bdayDateTime->format('--md') : $bdayDateTime->format('Ymd');
+                    $vCard->add('BDAY', $bdayFormated);
+                }
             }
         }
 
 
-        if ((boolean)$settings->get('include_url', true) === true) {  // Add Url's
+        if ((bool)$settings->get('include_url', true) === true) {  // Add Url's
             if (!empty($profile->url)) {
                 $vCard->add('URL', $profile->url);
             }
         }
 
 
-        if ((boolean)$settings->get('include_phone_numbers', true) === true) {  // Add Phone numbers
+        if ((bool)$settings->get('include_phone_numbers', true) === true) {  // Add Phone numbers
             if (!empty(str_replace(' ', '', $profile->phone_private ?? ''))) {
                 $vCard->add('TEL', str_replace(' ', '', $profile->phone_private), ['TYPE' => ['home', 'voice']]);
             }

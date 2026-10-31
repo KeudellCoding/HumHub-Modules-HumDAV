@@ -6,16 +6,14 @@
  * @author KeudellCoding
  */
 
-use humhub\assets\JqueryKnobAsset;
 use humhub\libs\ActionColumn;
-use humhub\libs\Html;
+use humhub\helpers\Html;
 use humhub\modules\humdav\models\UserToken;
-use humhub\modules\ui\form\widgets\ActiveForm;
-use humhub\widgets\Button;
+use humhub\widgets\form\ActiveForm;
+use humhub\widgets\bootstrap\Button;
 use humhub\widgets\GridView;
 use yii\helpers\Url;
 
-JqueryKnobAsset::register($this);
 ?>
 
 <div class="container">
@@ -24,25 +22,22 @@ JqueryKnobAsset::register($this);
             <div class="panel">
                 <div class="panel-heading"><i class="fa far fa-address-card"></i> <span><strong>HumDAV</strong> Access Infos</span></div>
                 <div class="panel-body">
-
-
-                    <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
-                        <li class="active">
-                            <a href="#login-options" data-toggle="tab">Login Options</a>
+                    <ul id="tabs" class="nav nav-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a id="login-options-tab" class="nav-link active" href="#login-options" data-bs-toggle="tab" role="tab" aria-controls="login-options" aria-selected="true">Login Options</a>
                         </li>
-                        <li>
-                            <a href="#auto-config-files" data-toggle="tab">Automatic Configuration Files</a>
+                        <li class="nav-item" role="presentation">
+                            <a id="auto-config-files-tab" class="nav-link" href="#auto-config-files" data-bs-toggle="tab" role="tab" aria-controls="auto-config-files" aria-selected="false">Automatic Configuration Files</a>
                         </li>
-                        <li>
-                            <a href="#settings" data-toggle="tab">Settings</a>
+                        <li class="nav-item" role="presentation">
+                            <a id="settings-tab" class="nav-link" href="#settings" data-bs-toggle="tab" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
                         </li>
-                        <li>
-                            <a href="#troubleshooting" data-toggle="tab">Troubleshooting</a>
+                        <li class="nav-item" role="presentation">
+                            <a id="troubleshooting-tab" class="nav-link" href="#troubleshooting" data-bs-toggle="tab" role="tab" aria-controls="troubleshooting" aria-selected="false">Troubleshooting</a>
                         </li>
                     </ul>
-
                     <div class="tab-content">
-                        <div class="tab-pane active" id="login-options">
+                        <div class="tab-pane active" id="login-options" role="tabpanel" aria-labelledby="login-options-tab">
                             <div class="">
                                 <div class="row">
                                     <div class="col-md-7">
@@ -51,23 +46,16 @@ JqueryKnobAsset::register($this);
                                             You can enter the following configuration details into your device (<a href="https://wiki.davical.org/index.php/CardDAV_Clients" target="_blank" rel="noopener noreferrer">List with some CardDAV clients</a>):
                                             <dl>
                                                 <dt>Type:</dt>
-                                                <dd><?=$calendarActivated ? 'CardDAV, CalDAV and iCal' : 'CardDAV and iCal'?></dd>
-
-                                                <hr>
+                                                <dd>CardDAV</dd>
 
                                                 <dt>CardDAV Url:</dt>
                                                 <dd><?=Url::to(['/humdav/remote/addressbooks/'.Yii::$app->user->identity->guid.'/'], true)?></dd>
 
-                                                <?php if ($calendarActivated) { ?>
-                                                    <dt>CalDAV Url:</dt>
-                                                    <dd><?=Url::to(['/humdav/remote/calendars/'.Yii::$app->user->identity->guid.'/'], true)?></dd>
-                                                <?php } ?>
-
-                                                <dt>Principal URL (=<?=$calendarActivated ? 'CardDAV/CalDAV' : 'CardDAV'?> Url for iOS and macOS):</dt>
+                                                <dt>CardDAV Principal URL (iOS and macOS):</dt>
                                                 <dd><?=Url::to(['/humdav/remote/principals/'.Yii::$app->user->identity->guid.'/'], true)?></dd>
 
                                                 <dt>Username:</dt>
-                                                <dd><?=Yii::$app->user->identity->username?></dd>
+                                                <dd><?=Html::encode(Yii::$app->user->identity->username)?></dd>
 
                                                 <dt>Password:</dt>
                                                 <dd><i><?=$enablePasswordAuth ? 'Your HumHub password or a valid token' : 'A valid token'?></i></dd>
@@ -75,18 +63,18 @@ JqueryKnobAsset::register($this);
                                                 <dt>Auth Type:</dt>
                                                 <dd>Basic</dd>
 
-                                                <?php if ($calendarActivated) { ?>
+                                                <?php if ($calendarEnabled) { ?>
                                                     <hr>
-
-                                                    <dt>iCal Address for <?=Html::dropDownList('Addressbook', null, $iCalCalendars, ['id' => 'ical_addressbook_selector'])?>
-                                                    <?=Html::button('Get URL', ['id' => 'ical_addressbook_button'])?>:</dt>
-                                                    <dd id='ical_addressbook_address' data-default-url="<?=Url::to(['/humdav/remote/ical/'.Yii::$app->user->identity->guid.'/[ADDRESSBOOK-ID]/[ICAL-TOKEN]'], true)?>"></dd>
+                                                    <dt>CalDAV URL (Calendar module):</dt>
+                                                    <dd><?= Html::encode($calDavUrl) ?></dd>
+                                                    <dd>Use the credentials from the Calendar export dialog. Automatic configuration profiles include the Calendar credentials when CalDAV is selected.</dd>
                                                 <?php } ?>
+
                                             </dl>
                                         </p>
                                     </div>
                                     <div class="col-md-5">
-                                        <div class="pull-right">
+                                        <div class="float-end">
                                             <?= Button::success('Add new Token')->icon('add')->sm()->link(['generate-token']) ?>
                                         </div>
                                         <h4>Login tokens:</h4>
@@ -96,17 +84,6 @@ JqueryKnobAsset::register($this);
                                             'tableOptions' => ['class' => 'table table-hover'],
                                             'columns' => [
                                                 ['attribute' => 'name'],
-                                                [
-                                                    'attribute' => 'used_for',
-                                                    'value' => function (UserToken $userToken) {
-                                                        switch ($userToken->used_for) {
-                                                            case UserToken::USED_FOR_DAV: return 'WebDAV';
-                                                            case UserToken::USED_FOR_ICAL: return 'iCal';
-                                                            
-                                                            default: return 'Nothing';
-                                                        }
-                                                    }
-                                                ],
                                                 [
                                                     'attribute' => 'last_time_used',
                                                     'value' => function (UserToken $userToken) {
@@ -134,15 +111,30 @@ JqueryKnobAsset::register($this);
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-pane" id="auto-config-files">
+                        <div class="tab-pane" id="auto-config-files" role="tabpanel" aria-labelledby="auto-config-files-tab">
                             <p>
                                 If you visit this page with iOS or macOS, you can download an automatically generated configuration file here:
-                                <br>
-                                <a class="btn btn-default" href="<?= Url::to(['/humdav/accessinfo/mobileconfig', 'target' => 'ios']); ?>" target="_blank">Download iOS Configuration File</a>
-                                <a class="btn btn-default" href="<?= Url::to(['/humdav/accessinfo/mobileconfig', 'target' => 'osx']); ?>" target="_blank">Download macOS Configuration File</a>
                             </p>
+                            <?= Html::beginForm(['/humdav/accessinfo/mobileconfig'], 'get', ['target' => '_blank', 'data-pjax' => '0']) ?>
+                                <div class="form-check mb-3">
+                                    <?= Html::checkbox('include_caldav', $calendarEnabled, [
+                                        'id' => 'mobileconfig-include-caldav',
+                                        'class' => 'form-check-input',
+                                        'uncheck' => '0',
+                                        'disabled' => !$calendarEnabled,
+                                    ]) ?>
+                                    <?= Html::label('Include CalDAV configuration from the Calendar module', 'mobileconfig-include-caldav', ['class' => 'form-check-label']) ?>
+                                </div>
+                                <?php if (!$calendarEnabled) { ?>
+                                    <p class="text-muted">Enable the Calendar module to include CalDAV. CardDAV is always included.</p>
+                                <?php } else { ?>
+                                    <p class="form-text">CardDAV is always included. CalDAV credentials are managed separately by the Calendar module.</p>
+                                <?php } ?>
+                                <?= Html::submitButton('Download iOS Configuration File', ['name' => 'target', 'value' => 'ios', 'class' => 'btn btn-secondary']) ?>
+                                <?= Html::submitButton('Download macOS Configuration File', ['name' => 'target', 'value' => 'osx', 'class' => 'btn btn-secondary']) ?>
+                            <?= Html::endForm() ?>
                         </div>
-                        <div class="tab-pane" id="settings">
+                        <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                             <?php $form = ActiveForm::begin(['enableClientValidation' => true]); ?>
 
                             <?= $form->field($userSettingsModel, 'provide_groups_as_separate_addressbooks')->checkbox(); ?>
@@ -151,12 +143,12 @@ JqueryKnobAsset::register($this);
                             
                             <?php ActiveForm::end(); ?>
                         </div>
-                        <div class="tab-pane" id="troubleshooting">
+                        <div class="tab-pane" id="troubleshooting" role="tabpanel" aria-labelledby="troubleshooting-tab">
                             <p>
                                 If authentication is not possible, this may have the following reasons:
                                 <ul>
                                     <li>The HumDAV module has not been activated yet.</li>
-                                    <li>The Calendar module has not been activated yet.</li>
+                                    <li>For calendar access, the Calendar module must be enabled.</li>
                                     <li>You have not been authorized for access.</li>
                                     <li>You have a typo somewhere.</li>
                                     <li>Also check the upper and lower case of your username.</li>
@@ -165,19 +157,8 @@ JqueryKnobAsset::register($this);
                             </p>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script <?= Html::nonce() ?>>
-    $(document).ready(function() {
-        var defaultUrl = $("#ical_addressbook_address").data("default-url");
-        $('#ical_addressbook_button').click(function() {
-            var url = defaultUrl.replace("[ADDRESSBOOK-ID]", $("#ical_addressbook_selector").val());
-            $("#ical_addressbook_address").text(url);
-        });
-    });
-</script>

@@ -38,7 +38,7 @@ class AddressBookMultiGetReport implements XmlDeserializable
     public $hrefs;
 
     /**
-     * The mimetype of the content that should be returend. Usually
+     * The mimetype of the content that should be returned. Usually
      * text/vcard.
      *
      * @var string
@@ -52,6 +52,13 @@ class AddressBookMultiGetReport implements XmlDeserializable
      * @var string
      */
     public $version = null;
+
+    /**
+     * An array with requested vcard properties.
+     *
+     * @var array
+     */
+    public $addressDataProperties;
 
     /**
      * The deserialize method is called during xml parsing.
@@ -76,8 +83,8 @@ class AddressBookMultiGetReport implements XmlDeserializable
     public static function xmlDeserialize(Reader $reader)
     {
         $elems = $reader->parseInnerTree([
-            '{urn:ietf:params:xml:ns:carddav}address-data' => 'Sabre\\CardDAV\\Xml\\Filter\\AddressData',
-            '{DAV:}prop' => 'Sabre\\Xml\\Element\\KeyValue',
+            '{urn:ietf:params:xml:ns:carddav}address-data' => \Sabre\CardDAV\Xml\Filter\AddressData::class,
+            '{DAV:}prop' => \Sabre\Xml\Element\KeyValue::class,
         ]);
 
         $newProps = [

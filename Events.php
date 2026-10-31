@@ -13,29 +13,23 @@ use yii\helpers\Url;
 use yii\helpers\StringHelper;
 use humhub\modules\humdav\definitions\RouteDefinitions;
 use humhub\modules\humdav\models\UserToken;
+use humhub\modules\ui\menu\MenuLink;
 use humhub\modules\user\models\User;
 
 class Events {
     public static function onBeforeRequest($event) {
-        if (!StringHelper::startsWith(Yii::$app->request->pathInfo, 'humdav/')) {
+        if (!StringHelper::startsWith(Yii::$app->request->pathInfo, 'humdav/')
+            && Yii::$app->request->pathInfo !== '.well-known/carddav') {
             return;
         }
 
         Yii::$app->urlManager->addRules(RouteDefinitions::getDefinitions(), true);
     }
     
-    public static function onBeforeAction($event) {
-        if (Yii::$app->request->pathInfo === '.well-known/carddav' || Yii::$app->request->pathInfo === '.well-known/caldav') {
-            Yii::$app->response->redirect('/humdav/remote')->send();
-            $event->handled = true;
-            die();
-        }
-    }
-
     public static function onTopMenuInit($event) {
         try {
             $settings = Yii::$app->getModule('humdav')->settings;
-            if ((boolean)$settings->get('active', false) !== true) {
+            if ((bool)$settings->get('active', false) !== true) {
                 return;
             }
             if ($settings->get('instruction_location') !== 'top_menu') {
@@ -51,16 +45,16 @@ class Events {
                 return;
             }
             
-            $event->sender->addItem([
+            $event->sender->addEntry(new MenuLink([
                 'label' => 'HumDAV',
                 'url' => Url::to(['/humdav/accessinfo/index']),
                 'htmlOptions' => [],
-                'icon' => '<i class="fa far fa-address-card"></i>',
+                'icon' => 'address-card',
                 'isActive' => (Yii::$app->controller->module
                     && Yii::$app->controller->module->id === 'humdav'
                     && Yii::$app->controller->id === 'accessinfo'),
                 'sortOrder' => $settings->get('instruction_location_sort_order', 400),
-            ]);
+            ]));
         } catch (\Throwable $e) {
             Yii::error($e);
         }
@@ -88,8 +82,8 @@ class Events {
                 if ($userToken->user === null) {
                     if ($integrityController->showFix('Deleting token ' . $userToken->id . ' without existing user!')) {
                         $userToken->delete();
-                        continue;
                     }
+                    continue;
                 }
 
                 if ($userToken->user->status !== User::STATUS_ENABLED) {
@@ -99,12 +93,6 @@ class Events {
                     }
                 }
 
-                if ($userToken->used_for === UserToken::USED_FOR_NOTHING) {
-                    if ($integrityController->showFix('Deleting disabled token ' . $userToken->id . '!')) {
-                        $userToken->delete();
-                        continue;
-                    }
-                }
             }
         } catch (\Throwable $e) {
             Yii::error($e);

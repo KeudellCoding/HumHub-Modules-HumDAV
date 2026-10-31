@@ -1,0 +1,77 @@
+name: Release ZIP
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out version
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Validate version and tag
+        id: metadata
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          module = json.loads(Path("module.json").read_text(encoding="utf-8"))
+          version = module.get("version", "")
+          if module.get("id") != "humdav":
+              raise SystemExit("Expected module ID humdav in module.json.")
+          if not isinstance(version, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?", version):
+              raise SystemExit("module.json must contain a version such as 1.6.0 or 1.6.0-rc.1.")
+          if os.environ["GITHUB_REF_TYPE"] != "tag" or os.environ["GITHUB_REF_NAME"] != f"v{version}":
+              raise SystemExit(f"Select or push tag v{version} to match module.json.")
+
+          archive = Path(os.environ["RUNNER_TEMP"]) / f"humdav-{version}.zip"
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"version={version}\narchive={archive}\n")
+          PY
+
+      - name: Build module ZIP
+        shell: bash
+        env:
+          ARCHIVE: ${{ steps.metadata.outputs.archive }}
+        run: |
+          git archive --format=zip --prefix=humdav/ --output="$ARCHIVE" HEAD
+          python3 -m zipfile --test "$ARCHIVE"
+
+      - name: Attach ZIP to GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+          ARCHIVE: ${{ steps.metadata.outputs.archive }}
+        run: |
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$ARCHIVE" --clobber
+          else
+            options=(--verify-tag --generate-notes --title "HumDAV $VERSION")
+            if [[ "$VERSION" == *-* ]]; then
+              options+=(--prerelease)
+            fi
+            gh release create "$RELEASE_TAG" "$ARCHIVE" "${options[@]}"
+          fi

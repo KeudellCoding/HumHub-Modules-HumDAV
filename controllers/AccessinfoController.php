@@ -10,18 +10,16 @@ namespace humhub\modules\humdav\controllers;
 
 use Yii;
 use humhub\components\Controller;
-use humhub\components\Response;
+use humhub\modules\humdav\components\MobileConfig;
 use humhub\modules\humdav\models\UserSettingsEditForm;
 use humhub\modules\humdav\models\UserToken;
 use humhub\modules\humdav\models\UserTokenSearch;
-use humhub\modules\space\models\Membership;
-use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\GoneHttpException;
+use yii\web\ServerErrorHttpException;
 
 class AccessinfoController extends Controller {
     /**
@@ -34,7 +32,7 @@ class AccessinfoController extends Controller {
         }
         
         $settings = Yii::$app->getModule('humdav')->settings;
-        if ((boolean)$settings->get('active', false) !== true) {
+        if ((bool)$settings->get('active', false) !== true) {
             throw new NotFoundHttpException('Module not activated');
         }
         
@@ -56,21 +54,16 @@ class AccessinfoController extends Controller {
         $searchModel = new UserTokenSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        $iCalCalendars = [];
-        if (Yii::$app->getModule('calendar') !== null) {
-            if (Yii::$app->user->identity->moduleManager->isEnabled('calendar'))
-                $iCalCalendars['0'] = 'Personal';
-            foreach (Membership::getUserSpaces(Yii::$app->user->identity->id) as $space)
-                $iCalCalendars['space_'.$space->id] = 'Space: '.$space->name;
-        }
+        $calendar = Yii::$app->getModule('calendar');
+        $calendarEnabled = $calendar !== null && $calendar->getIsEnabled();
 
         return $this->render('index', [
             'userSettingsModel' => $userSettingsForm,
             'enablePasswordAuth' => Yii::$app->getModule('humdav')->settings->get('enable_password_auth', false),
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
-            'iCalCalendars' => $iCalCalendars,
-            'calendarActivated' => Yii::$app->getModule('calendar') !== null && Yii::$app->getModule('calendar')->isActivated
+            'calendarEnabled' => $calendarEnabled,
+            'calDavUrl' => $calendarEnabled ? Url::to(['/calendar/cal-dav/index'], true) : null,
         ]);
     }
 
@@ -102,8 +95,11 @@ class AccessinfoController extends Controller {
 
     public function actionGenerateToken() {
         if (Yii::$app->request->isPost) {
-            $newUserToken = new UserToken(Json::decode(Yii::$app->session->getFlash('newUserToken', '{}', true)));
-            if ($newUserToken == null) throw new GoneHttpException();
+            $attributes = Yii::$app->session->getFlash('newCardDavToken', null, true);
+            if (!is_array($attributes) || (int)($attributes['user_id'] ?? 0) !== (int)Yii::$app->user->id) {
+                throw new GoneHttpException('This token form has expired. Please generate a new token.');
+            }
+            $newUserToken = new UserToken($attributes);
             
             if ($newUserToken->load(Yii::$app->request->post()) && $newUserToken->validate() && $newUserToken->save())
                 $this->view->saved();
@@ -118,7 +114,7 @@ class AccessinfoController extends Controller {
             $newUserToken->name = 'New Token';
             $token = $newUserToken->generateToken();
             if (empty($token)) throw new BadRequestHttpException('Cannot generate a token.');
-            Yii::$app->session->setFlash('newUserToken', Json::encode($newUserToken));
+            Yii::$app->session->setFlash('newCardDavToken', $newUserToken->getAttributes());
 
             return $this->render('GenerateToken', [
                 'userToken' => $newUserToken,
@@ -130,9 +126,36 @@ class AccessinfoController extends Controller {
     }
 
     public function actionMobileconfig() {
-        Yii::$app->response->format = Response::FORMAT_RAW;
-        $this->layout = false;
-        
-        return $this->render('MobileConfig');
+        $target = Yii::$app->request->get('target');
+        if (!in_array($target, ['ios', 'osx'], true)) {
+            throw new BadRequestHttpException('Unsupported configuration profile target.');
+        }
+
+        $includeCalDav = Yii::$app->request->get('include_caldav', '1');
+        if (!in_array($includeCalDav, ['0', '1'], true)) {
+            throw new BadRequestHttpException('Invalid CalDAV configuration option.');
+        }
+
+        $user = Yii::$app->user->identity;
+        $userToken = new UserToken();
+        $userToken->user_id = $user->id;
+        $userToken->name = 'Token for ' . $target;
+        $token = $userToken->generateToken();
+        if ($token === null) {
+            throw new ServerErrorHttpException('Cannot generate a token.');
+        }
+
+        $content = MobileConfig::build($user, $token, $target, $includeCalDav === '1');
+        if (!$userToken->save()) {
+            throw new ServerErrorHttpException('Cannot save the configuration profile token.');
+        }
+
+        $response = Yii::$app->response->sendContentAsFile($content, 'humdav-profile.mobileconfig', [
+            'mimeType' => 'application/x-apple-aspen-config',
+        ]);
+        $response->headers->set('Cache-Control', 'no-store');
+        $response->headers->set('Pragma', 'no-cache');
+
+        return $response;
     }
 }

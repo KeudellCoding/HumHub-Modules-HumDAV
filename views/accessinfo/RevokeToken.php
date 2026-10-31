@@ -6,8 +6,8 @@
  * @author KeudellCoding
  */
 
-use humhub\modules\ui\form\widgets\ActiveForm;
-use yii\helpers\Html;
+use humhub\widgets\form\ActiveForm;
+use humhub\helpers\Html;
 use yii\helpers\Url;
 
 ?>
@@ -19,10 +19,10 @@ use yii\helpers\Url;
                 <div class="panel-heading"><i class="fa far fa-address-card"></i> <span><strong>HumDAV</strong> Revoke Token</span></div>
                 <div class="panel-body">
                     <p><strong>Are you sure you want to disable access with this token?</strong></p>
-                    <div class="well">
-                        <b><?= $userToken->name ?></b>
+                    <div class="rounded bg-light p-3 mb-3">
+                        <b><?= Html::encode($userToken->name) ?></b>
                         <hr>
-                        <p><i class="fa fa-exclamation-triangle" style="color: <?= $this->theme->variable('danger')?>"></i> &nbsp;Access with this token will no longer be possible.</p>
+                        <p><i class="fa fa-exclamation-triangle text-danger"></i> &nbsp;Access with this token will no longer be possible.</p>
                     </div>
 
                     <br />

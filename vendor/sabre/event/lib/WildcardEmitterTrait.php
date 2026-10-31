@@ -82,7 +82,7 @@ trait WildcardEmitterTrait
      * Lastly, if there are 5 event handlers for an event. The continueCallback
      * will be called at most 4 times.
      */
-    public function emit(string $eventName, array $arguments = [], callable $continueCallBack = null): bool
+    public function emit(string $eventName, array $arguments = [], ?callable $continueCallBack = null): bool
     {
         if (\is_null($continueCallBack)) {
             foreach ($this->listeners($eventName) as $listener) {
@@ -126,11 +126,9 @@ trait WildcardEmitterTrait
         if (!\array_key_exists($eventName, $this->listenerIndex)) {
             // Create a new index.
             $listeners = [];
-            $listenersPriority = [];
             if (isset($this->listeners[$eventName])) {
                 foreach ($this->listeners[$eventName] as $listener) {
-                    $listenersPriority[] = $listener[0];
-                    $listeners[] = $listener[1];
+                    $listeners[] = $listener;
                 }
             }
 
@@ -138,17 +136,18 @@ trait WildcardEmitterTrait
                 // Wildcard match
                 if (\substr($eventName, 0, \strlen($wcEvent)) === $wcEvent) {
                     foreach ($wcListeners as $listener) {
-                        $listenersPriority[] = $listener[0];
-                        $listeners[] = $listener[1];
+                        $listeners[] = $listener;
                     }
                 }
             }
 
             // Sorting by priority
-            \array_multisort($listenersPriority, SORT_NUMERIC, $listeners);
+            \usort($listeners, static function ($l1, $l2) {
+                return $l1[0] <=> $l2[0];
+            });
 
             // Creating index
-            $this->listenerIndex[$eventName] = $listeners;
+            $this->listenerIndex[$eventName] = \array_column($listeners, 1);
         }
 
         return $this->listenerIndex[$eventName];
@@ -195,7 +194,7 @@ trait WildcardEmitterTrait
      * removed. If it is not specified, every listener for every event is
      * removed.
      */
-    public function removeAllListeners(string $eventName = null)
+    public function removeAllListeners(?string $eventName = null)
     {
         if (\is_null($eventName)) {
             $this->listeners = [];

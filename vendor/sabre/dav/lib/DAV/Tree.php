@@ -16,7 +16,7 @@ use Sabre\Uri;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Tree
+class Tree implements INodeByPath
 {
     /**
      * The root node.
@@ -62,20 +62,38 @@ class Tree
             return $this->rootNode;
         }
 
-        // Attempting to fetch its parent
-        list($parentName, $baseName) = Uri\split($path);
+        $node = $this->rootNode;
 
-        // If there was no parent, we must simply ask it from the root node.
-        if ('' === $parentName) {
-            $node = $this->rootNode->getChild($baseName);
-        } else {
-            // Otherwise, we recursively grab the parent and ask him/her.
-            $parent = $this->getNodeForPath($parentName);
+        // look for any cached parent and collect the parts below the parent
+        $parts = [];
+        $remainingPath = $path;
+        do {
+            list($remainingPath, $baseName) = Uri\split($remainingPath);
+            array_unshift($parts, $baseName);
 
-            if (!($parent instanceof ICollection)) {
+            if (isset($this->cache[$remainingPath])) {
+                $node = $this->cache[$remainingPath];
+                break;
+            }
+        } while ('' !== $remainingPath);
+
+        while (count($parts)) {
+            if (!($node instanceof ICollection)) {
                 throw new Exception\NotFound('Could not find node at path: '.$path);
             }
-            $node = $parent->getChild($baseName);
+
+            if ($node instanceof INodeByPath) {
+                $targetNode = $node->getNodeForPath(implode('/', $parts));
+                if ($targetNode instanceof INode) {
+                    $node = $targetNode;
+                    break;
+                }
+            }
+
+            $part = array_shift($parts);
+            if ('' !== $part) {
+                $node = $node->getChild($part);
+            }
         }
 
         $this->cache[$path] = $node;
@@ -119,8 +137,11 @@ class Tree
      *
      * @param string $sourcePath      The source location
      * @param string $destinationPath The full destination path
+     * @param int    $depth           How many levels of children to copy.
+     *                                The value can be 'infinity' (\Sabre\DAV\Server::DEPTH_INFINITY) or a positive integer, including zero.
+     *                                Zero means only copy the collection without children but with its properties.
      */
-    public function copy($sourcePath, $destinationPath)
+    public function copy($sourcePath, $destinationPath, int $depth = Server::DEPTH_INFINITY)
     {
         $sourceNode = $this->getNodeForPath($sourcePath);
 
@@ -129,8 +150,8 @@ class Tree
 
         $destinationParent = $this->getNodeForPath($destinationDir);
         // Check if the target can handle the copy itself. If not, we do it ourselves.
-        if (!$destinationParent instanceof ICopyTarget || !$destinationParent->copyInto($destinationName, $sourcePath, $sourceNode)) {
-            $this->copyNode($sourceNode, $destinationParent, $destinationName);
+        if (!$destinationParent instanceof ICopyTarget || !$destinationParent->copyInto($destinationName, $sourcePath, $sourceNode, $depth)) {
+            $this->copyNode($sourceNode, $destinationParent, $destinationName, $depth);
         }
 
         $this->markDirty($destinationDir);
@@ -160,7 +181,8 @@ class Tree
                 $moveSuccess = $newParentNode->moveInto($destinationName, $sourcePath, $sourceNode);
             }
             if (!$moveSuccess) {
-                $this->copy($sourcePath, $destinationPath);
+                // Move is a copy with depth = infinity and deleting the source afterwards
+                $this->copy($sourcePath, $destinationPath, Server::DEPTH_INFINITY);
                 $this->getNodeForPath($sourcePath)->delete();
             }
         }
@@ -197,9 +219,13 @@ class Tree
             $basePath .= '/';
         }
 
-        foreach ($node->getChildren() as $child) {
-            $this->cache[$basePath.$child->getName()] = $child;
-            yield $child;
+        if ($node instanceof ICollection) {
+            foreach ($node->getChildren() as $child) {
+                $this->cache[$basePath.$child->getName()] = $child;
+                yield $child;
+            }
+        } else {
+            yield from [];
         }
     }
 
@@ -285,8 +311,9 @@ class Tree
      * copyNode.
      *
      * @param string $destinationName
+     * @param int    $depth           How many children of the node to copy
      */
-    protected function copyNode(INode $source, ICollection $destinationParent, $destinationName = null)
+    protected function copyNode(INode $source, ICollection $destinationParent, ?string $destinationName = null, int $depth = Server::DEPTH_INFINITY)
     {
         if ('' === (string) $destinationName) {
             $destinationName = $source->getName();
@@ -308,10 +335,16 @@ class Tree
             $destination = $destinationParent->getChild($destinationName);
         } elseif ($source instanceof ICollection) {
             $destinationParent->createDirectory($destinationName);
-
             $destination = $destinationParent->getChild($destinationName);
-            foreach ($source->getChildren() as $child) {
-                $this->copyNode($child, $destination);
+
+            // Copy children if depth is not zero
+            if (0 !== $depth) {
+                // Adjust next depth for children (keep 'infinity' or decrease)
+                $depth = Server::DEPTH_INFINITY === $depth ? Server::DEPTH_INFINITY : $depth - 1;
+                $destination = $destinationParent->getChild($destinationName);
+                foreach ($source->getChildren() as $child) {
+                    $this->copyNode($child, $destination, null, $depth);
+                }
             }
         }
         if ($source instanceof IProperties && $destination instanceof IProperties) {

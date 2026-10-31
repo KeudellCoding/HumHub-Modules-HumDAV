@@ -1,0 +1,10 @@
+# Development files and macOS metadata do not belong in distribution archives.
+.git* export-ignore
+.DS_Store export-ignore
+._* export-ignore
+__MACOSX export-ignore
+composer.* export-ignore
+test export-ignore
+tests export-ignore
+phpunit.xml* export-ignore
+.phpunit* export-ignore

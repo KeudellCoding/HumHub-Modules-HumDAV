@@ -8,7 +8,6 @@
 
 namespace humhub\modules\humdav\models;
 
-use humhub\modules\humdav\controllers\AdminController;
 use Yii;
 use yii\base\Model;
 
@@ -28,6 +27,7 @@ class UserSettingsEditForm extends Model {
      * @inheritdocs
      */
     public function init() {
+        parent::init();
         $settings = Yii::$app->getModule('humdav')->settings->user();
         $this->provide_groups_as_separate_addressbooks = $settings->get('provide_groups_as_separate_addressbooks', false);
     }
@@ -46,7 +46,7 @@ class UserSettingsEditForm extends Model {
      */
     public function save() {
         $settings = Yii::$app->getModule('humdav')->settings->user();
-        $settings->set('provide_groups_as_separate_addressbooks', (boolean) $this->provide_groups_as_separate_addressbooks);
+        $settings->set('provide_groups_as_separate_addressbooks', (bool)$this->provide_groups_as_separate_addressbooks);
 
         return true;
     }

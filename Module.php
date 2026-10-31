@@ -8,7 +8,6 @@
 
 namespace humhub\modules\humdav;
 
-use Yii;
 use yii\helpers\Url;
 
 class Module extends \humhub\components\Module {
@@ -17,15 +16,6 @@ class Module extends \humhub\components\Module {
      */
     public $resourcesPath = 'resources';
     
-    /**
-     * @inheritdoc
-     */
-    public function beforeAction($action) {
-        Yii::$app->request->setBodyParams(null);
-
-        return parent::beforeAction($action);
-    }
-
     /**
      * @inheritdoc
      */

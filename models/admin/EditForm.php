@@ -43,6 +43,7 @@ class EditForm extends Model {
      * @inheritdocs
      */
     public function init() {
+        parent::init();
         $settings = Yii::$app->getModule('humdav')->settings;
         $this->active = $settings->get('active', false);
 
@@ -92,24 +93,24 @@ class EditForm extends Model {
      */
     public function save() {
         $settings = Yii::$app->getModule('humdav')->settings;
-        $settings->set('active', (boolean) $this->active);
+        $settings->set('active', (bool)$this->active);
 
         $settings->set('instruction_location', $this->instruction_location);
         $settings->set('instruction_location_sort_order', $this->instruction_location_sort_order);
 
         $settings->setSerialized('enabled_users', (array)$this->enabled_users);
-        $settings->set('enable_password_auth', (boolean) $this->enable_password_auth);
+        $settings->set('enable_password_auth', (bool)$this->enable_password_auth);
 
-        $settings->set('include_address', (boolean) $this->include_address);
-        $settings->set('include_profile_image', (boolean) $this->include_profile_image);
-        $settings->set('include_birthday', (boolean) $this->include_birthday);
-        $settings->set('include_gender', (boolean) $this->include_gender);
-        $settings->set('include_phone_numbers', (boolean) $this->include_phone_numbers);
-        $settings->set('include_url', (boolean) $this->include_url);
+        $settings->set('include_address', (bool)$this->include_address);
+        $settings->set('include_profile_image', (bool)$this->include_profile_image);
+        $settings->set('include_birthday', (bool)$this->include_birthday);
+        $settings->set('include_gender', (bool)$this->include_gender);
+        $settings->set('include_phone_numbers', (bool)$this->include_phone_numbers);
+        $settings->set('include_url', (bool)$this->include_url);
 
-        $settings->set('enable_space_addressbooks', (boolean) $this->enable_space_addressbooks);
+        $settings->set('enable_space_addressbooks', (bool)$this->enable_space_addressbooks);
         
-        $settings->set('enable_browser_plugin', (boolean) $this->enable_browser_plugin);
+        $settings->set('enable_browser_plugin', (bool)$this->enable_browser_plugin);
 
         return true;
     }

@@ -25,6 +25,7 @@ use Sabre\HTTP\ResponseInterface;
 use Sabre\VObject;
 use Sabre\VObject\Component\VCalendar;
 use Sabre\VObject\ITip;
+use Sabre\VObject\ITip\Broker;
 use Sabre\VObject\ITip\Message;
 use Sabre\VObject\Reader;
 
@@ -112,8 +113,8 @@ class Plugin extends ServerPlugin
          * This information ensures that the {DAV:}resourcetype property has
          * the correct values.
          */
-        $server->resourceTypeMapping['\\Sabre\\CalDAV\\Schedule\\IOutbox'] = $ns.'schedule-outbox';
-        $server->resourceTypeMapping['\\Sabre\\CalDAV\\Schedule\\IInbox'] = $ns.'schedule-inbox';
+        $server->resourceTypeMapping[\Sabre\CalDAV\Schedule\IOutbox::class] = $ns.'schedule-outbox';
+        $server->resourceTypeMapping[\Sabre\CalDAV\Schedule\IInbox::class] = $ns.'schedule-inbox';
 
         /*
          * Properties we protect are made read-only by the server.
@@ -389,7 +390,7 @@ class Plugin extends ServerPlugin
             $node->getOwner()
         );
 
-        $broker = new ITip\Broker();
+        $broker = $this->createITipBroker();
         $messages = $broker->parseEvent(null, $addresses, $node->get());
 
         foreach ($messages as $message) {
@@ -500,7 +501,7 @@ class Plugin extends ServerPlugin
             $isNewNode = true;
         }
 
-        $broker = new ITip\Broker();
+        $broker = $this->createITipBroker();
         $newObject = $broker->processMessage($iTipMessage, $currentObject);
 
         $inbox->createFile($newFileName, $iTipMessage->message->serialize());
@@ -605,14 +606,13 @@ class Plugin extends ServerPlugin
      *
      * This method may update $newObject to add any status changes.
      *
-     * @param VCalendar|string $oldObject
-     * @param array            $ignore    any addresses to not send messages to
-     * @param bool             $modified  a marker to indicate that the original object
-     *                                    modified by this process
+     * @param VCalendar|string|null $oldObject
+     * @param array                 $ignore    any addresses to not send messages to
+     * @param bool                  $modified  a marker to indicate that the original object modified by this process
      */
     protected function processICalendarChange($oldObject, VCalendar $newObject, array $addresses, array $ignore = [], &$modified = false)
     {
-        $broker = new ITip\Broker();
+        $broker = $this->createITipBroker();
         $messages = $broker->parseEvent($newObject, $addresses, $oldObject);
 
         if ($messages) {
@@ -969,7 +969,7 @@ class Plugin extends ServerPlugin
      *
      * @return bool
      */
-    private function scheduleReply(RequestInterface $request)
+    protected function scheduleReply(RequestInterface $request)
     {
         $scheduleReply = $request->getHeader('Schedule-Reply');
 
@@ -994,5 +994,13 @@ class Plugin extends ServerPlugin
             'description' => 'Adds calendar-auto-schedule, as defined in rfc6638',
             'link' => 'http://sabre.io/dav/scheduling/',
         ];
+    }
+
+    /**
+     * Returns an instance of the iTip\Broker.
+     */
+    protected function createITipBroker(): Broker
+    {
+        return new Broker();
     }
 }

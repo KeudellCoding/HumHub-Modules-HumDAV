@@ -33,7 +33,7 @@ class AuthenticationBackend extends AbstractBasic {
             return [false, "Username or password was incorrect"];
 
         $settings = Yii::$app->getModule('humdav')->settings;
-        if ((boolean)$settings->get('active', false) !== true)
+        if ((bool)$settings->get('active', false) !== true)
             return [false, "Username or password was incorrect"];
             
         $allowedUsers = array_filter((array)$settings->getSerialized('enabled_users'));
@@ -43,6 +43,8 @@ class AuthenticationBackend extends AbstractBasic {
         if (!$this->validateUserPass($userpass[0], $userpass[1]))
             return [false, "Username or password was incorrect"];
 
+        Yii::$app->user->setIdentity($user);
+
         return [true, $this->principalPrefix . $user->guid];
     }
 
@@ -50,7 +52,7 @@ class AuthenticationBackend extends AbstractBasic {
         $user = User::findOne(['username' => $username, 'status' => User::STATUS_ENABLED]);
         if ($user === null) return false;
         
-        if (UserToken::validateTokenForUser($user, $password, UserToken::USED_FOR_DAV)) {
+        if (UserToken::validateTokenForUser($user, $password)) {
             return true;
         }
 

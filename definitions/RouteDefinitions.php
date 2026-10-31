@@ -11,12 +11,8 @@ namespace humhub\modules\humdav\definitions;
 class RouteDefinitions {
     public static function getDefinitions() {
         return [
+            ['pattern' => '.well-known/carddav', 'route' => 'humdav/remote/discovery'],
             ['pattern' => 'humdav/remote', 'route' => 'humdav/remote'],
-            [
-                'pattern' => 'humdav/remote/ical/<userGuid:[a-zA-Z0-9_-]+>/<calendarId:[a-zA-Z0-9_-]+>/<token:[a-zA-Z0-9_-]+>',
-                'route' => 'humdav/remote/ical',
-                'verb' => ['GET']
-            ],
             ['pattern' => 'humdav/remote/<tmpParam:.*>', 'route' => 'humdav/remote'],
 
             ['pattern' => 'humdav/accessinfo/index', 'route' => 'humdav/accessinfo', 'verb' => ['GET', 'POST']],

@@ -6,9 +6,9 @@
  * @author KeudellCoding
  */
 
-use yii\helpers\Html;
+use humhub\helpers\Html;
 use yii\helpers\Url;
-use humhub\modules\ui\form\widgets\ActiveForm;
+use humhub\widgets\form\ActiveForm;
 use humhub\modules\user\widgets\UserPickerField;
 use humhub\modules\humdav\models\admin\EditForm;
 
@@ -49,20 +49,15 @@ use humhub\modules\humdav\models\admin\EditForm;
 
         <?= $form->field($model, 'enable_browser_plugin')->checkbox(); ?>
 
-        <span>Since HumHub version 1.13, the .htaccess file already contains all the necessary changes to enable automatic detection (.well-known redirects). Please make sure that the current .htaccess file is on the server and/or that the following redirects are configured and/or possible:</span>
+        <span>Automatic account discovery uses the following redirects. Make sure your web server forwards these paths to HumHub:</span>
         <ul>
             <li><?=Url::to(['/.well-known/carddav'], true)?> &rarr; <?=Url::to(['/humdav/remote'], true)?></li>
-            <li><?=Url::to(['/.well-known/caldav'], true)?> &rarr; <?=Url::to(['/humdav/remote'], true)?></li>
         </ul>
 
         <hr />
 
         <?= Html::submitButton("Save", ['class' => 'btn btn-primary', 'data-ui-loader' => '']); ?>
-        <a class="btn btn-default" href="<?= Url::to(['/admin/module']); ?>">Back to modules</a>
-
-        <hr />
-
-        <span>If you like this plugin, I would be very happy about a <a href="https://ko-fi.com/KeudellCoding" target="_blank" rel="noopener noreferrer">Ko-fi</a> :)</span>
+        <a class="btn btn-secondary" href="<?= Url::to(['/admin/module']); ?>">Back to modules</a>
 
         <?php ActiveForm::end(); ?>
     </div>

@@ -93,7 +93,7 @@ class EventIterator implements \Iterator
      * @param DateTimeZone    $timeZone reference timezone for floating dates and
      *                                  times
      */
-    public function __construct($input, $uid = null, DateTimeZone $timeZone = null)
+    public function __construct($input, $uid = null, ?DateTimeZone $timeZone = null)
     {
         if (is_null($timeZone)) {
             $timeZone = new DateTimeZone('UTC');
@@ -168,8 +168,12 @@ class EventIterator implements \Iterator
         }
 
         if (isset($this->masterEvent->RDATE)) {
+            $rdateValues = [];
+            foreach ($this->masterEvent->RDATE as $rdate) {
+                $rdateValues = array_merge($rdateValues, $rdate->getParts());
+            }
             $this->recurIterator = new RDateIterator(
-                $this->masterEvent->RDATE->getParts(),
+                $rdateValues,
                 $this->startDate
             );
         } elseif (isset($this->masterEvent->RRULE)) {

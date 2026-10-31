@@ -19,6 +19,10 @@ class UserTokenSearch extends UserToken {
         return [[self::getSearchableFields(), 'safe']];
     }
 
+    public function scenarios() {
+        return [self::SCENARIO_DEFAULT => self::getSearchableFields()];
+    }
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -57,7 +61,6 @@ class UserTokenSearch extends UserToken {
     private static function getSearchableFields() {
         return [
             'name',
-            'used_for',
             'last_time_used',
             'last_time_used_by_ip',
             'last_time_used_by_user_agent',

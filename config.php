@@ -19,7 +19,6 @@ return [
     'namespace' => 'humhub\modules\humdav',
     'events' => [
         [Application::class, Application::EVENT_BEFORE_REQUEST, [Events::class, 'onBeforeRequest']],
-        [Application::class, Application::EVENT_BEFORE_ACTION, [Events::class, 'onBeforeAction']],
         [TopMenu::class, TopMenu::EVENT_INIT, [Events::class, 'onTopMenuInit']],
         [OnlineModuleManager::class, OnlineModuleManager::EVENT_AFTER_UPDATE, [Events::class, 'onAfterUpdate']],
         [IntegrityController::class, IntegrityController::EVENT_ON_RUN, [Events::class, 'onIntegrityCheck']],

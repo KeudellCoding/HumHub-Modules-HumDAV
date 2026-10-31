@@ -1,6 +1,18 @@
 Changelog
 =========
 
+1.6.0 (October 31, 2026)
+----------------------
+- Chng: Require HumHub 1.19 and PHP 8.2 or newer.
+- Chng: Remove HumDAV's own CalDAV server and iCal subscriptions; use the Calendar module's native calendar services instead. Existing HumDAV calendar URLs no longer work.
+- Chng: Migrate tokens to CardDAV only, delete obsolete iCal and other non-DAV tokens, and remove the "Used for" field. Existing CardDAV credentials remain valid.
+- Enh: Include native Calendar CalDAV credentials and principal URLs in Apple profiles through an enabled-by-default checkbox. CardDAV is always included.
+- Fix: Migrate forms, HTML helpers, buttons, menu entries, profile images and module activation checks to the HumHub 1.19 APIs, with Bootstrap 5 tabs and CSP-compatible clipboard handling.
+- Fix: Use a stateless DAV identity for contact visibility, preserve base paths in CardDAV discovery, and leave CalDAV discovery to Calendar.
+- Fix: Deliver escaped Apple profiles through HumHub responses, protect token owners and hashes from form assignment, handle expired token forms and escape token metadata.
+- Enh: Update SabreDAV to 4.7.1 and its dependencies, with a Composer lock file.
+- Enh: Add integration and HTTP smoke tests, including legacy token migration and optional native Calendar coverage.
+
 1.5.1 (June 29, 2023)
 ----------------------
 - Fix: Error when calling mobileconfig if the server manages the files case sensitive.

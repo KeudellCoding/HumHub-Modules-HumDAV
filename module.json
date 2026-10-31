@@ -3,9 +3,9 @@
     "name": "HumHub DAV Access",
     "description": "Make all your data available for mobile devices and other interfaces.",
     "keywords": ["caldav", "carddav", "webdav", "dav", "sabre"],
-    "version": "1.5.1",
+    "version": "1.6.0",
     "humhub": {
-        "minVersion": "1.13"
+        "minVersion": "1.19"
     },
     "authors": [
         {

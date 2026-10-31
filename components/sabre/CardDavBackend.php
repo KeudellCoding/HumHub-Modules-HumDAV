@@ -98,8 +98,7 @@ class CardDavBackend extends AbstractBackend {
         $results = [];
         $usersForCards = [];
 
-        $username = Yii::$app->request->getAuthUser();
-        $currentUser = User::findOne(['username' => $username]);
+        $currentUser = Yii::$app->user->getIdentity();
         if ($currentUser === null) {
             return [];
         }
@@ -107,7 +106,7 @@ class CardDavBackend extends AbstractBackend {
         $settings = Yii::$app->getModule('humdav')->settings;
 
         if ($addressBookId === '0') {
-            $usersForCards = User::findAll(['user.status' => User::STATUS_ENABLED]);
+            $usersForCards = User::find()->active()->visible()->all();
         }
         else if ($addressBookId === '1') {
             $usersForCards = Follow::getFollowedUserQuery($currentUser)->active()->visible()->all();
