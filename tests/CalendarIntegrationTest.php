@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * HumHub DAV Access
+ *
+ * @package humhub.modules.humdav
+ * @author KeudellCoding
+ */
+
 use humhub\modules\humdav\components\MobileConfig;
 use humhub\modules\calendar\helpers\AuthTokenService;
 use humhub\modules\calendar\helpers\dav\CalDavAuth;

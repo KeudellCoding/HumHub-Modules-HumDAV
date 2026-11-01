@@ -16,13 +16,13 @@ use yii\helpers\Url;
     <div class="row">
         <div class="col-md-12">
             <div class="panel">
-                <div class="panel-heading"><i class="fa far fa-address-card"></i> <span><strong>HumDAV</strong> Revoke Token</span></div>
+                <div class="panel-heading"><i class="fa far fa-address-card"></i> <span><strong>HumDAV</strong> <?= Yii::t('HumdavModule.base', 'Revoke Token') ?></span></div>
                 <div class="panel-body">
-                    <p><strong>Are you sure you want to disable access with this token?</strong></p>
+                    <p><strong><?= Yii::t('HumdavModule.base', 'Are you sure you want to disable access with this token?') ?></strong></p>
                     <div class="rounded bg-light p-3 mb-3">
                         <b><?= Html::encode($userToken->name) ?></b>
                         <hr>
-                        <p><i class="fa fa-exclamation-triangle text-danger"></i> &nbsp;Access with this token will no longer be possible.</p>
+                        <p><i class="fa fa-exclamation-triangle text-danger"></i> &nbsp;<?= Yii::t('HumdavModule.base', 'Access with this token will no longer be possible.') ?></p>
                     </div>
 
                     <br />
@@ -31,7 +31,7 @@ use yii\helpers\Url;
                     $form = ActiveForm::begin();
                     echo Html::submitButton('Revoke access with this token', ['class' => 'btn btn-danger', 'data-ui-loader' => '', 'name' => 'revoke-token-action', 'value'=> 'revoke']);
                     ?>
-                    <a class="btn btn-primary" href="<?= Url::to(['index']); ?>">Cancel</a>
+                    <a class="btn btn-primary" href="<?= Url::to(['index']); ?>"><?= Yii::t('HumdavModule.base', 'Cancel') ?></a>
                     <?php ActiveForm::end(); ?>
                 </div>
             </div>

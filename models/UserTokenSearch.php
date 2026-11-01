@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -11,15 +12,18 @@ namespace humhub\modules\humdav\models;
 use Yii;
 use yii\data\ActiveDataProvider;
 
-class UserTokenSearch extends UserToken {
+class UserTokenSearch extends UserToken
+{
     /**
      * {@inheritdoc}
      */
-    public function rules() {
+    public function rules()
+    {
         return [[self::getSearchableFields(), 'safe']];
     }
 
-    public function scenarios() {
+    public function scenarios()
+    {
         return [self::SCENARIO_DEFAULT => self::getSearchableFields()];
     }
 
@@ -30,7 +34,8 @@ class UserTokenSearch extends UserToken {
      *
      * @return ActiveDataProvider
      */
-    public function search($params) {
+    public function search($params)
+    {
         $query = UserToken::find()->where(['user_id' => Yii::$app->user->id]);
 
         $dataProvider = new ActiveDataProvider([
@@ -58,7 +63,8 @@ class UserTokenSearch extends UserToken {
         return $dataProvider;
     }
 
-    private static function getSearchableFields() {
+    private static function getSearchableFields()
+    {
         return [
             'name',
             'last_time_used',
@@ -66,7 +72,7 @@ class UserTokenSearch extends UserToken {
             'last_time_used_by_user_agent',
             'created_at',
             'created_by_ip',
-            'created_by_user_agent'
+            'created_by_user_agent',
         ];
     }
 }

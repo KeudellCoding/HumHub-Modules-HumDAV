@@ -27,7 +27,7 @@ class Forms(HTMLParser):
         if tag == "input":
             self.inputs.append(attrs)
         if tag == "form":
-            self.current = {"action": attrs.get("action", ""), "fields": {}}
+            self.current = {"action": attrs.get("action", ""), "method": attrs.get("method", "get"), "fields": {}}
             self.forms.append(self.current)
         elif tag == "input" and self.current is not None and attrs.get("name"):
             if attrs.get("type") in ("checkbox", "radio") and "checked" not in attrs:
@@ -116,7 +116,7 @@ class HttpSmokeTest(unittest.TestCase):
         self.assertEqual(200, status)
         self.assertNotIn(b"used_for", html)
         self.assertNotIn(b"Used For", html)
-        secret = re.search(rb"Your token: <b>([^<]+)</b>", html).group(1).decode()
+        secret = re.search(rb'<b id="humdav-generated-token">([^<]+)</b>', html).group(1).decode()
         form = Forms(html.decode()).containing("UserToken[name]")
         name = "humdav-http-" + uuid.uuid4().hex
         form["fields"]["UserToken[name]"] = name
@@ -136,10 +136,19 @@ class HttpSmokeTest(unittest.TestCase):
             headers["Authorization"] = "Basic " + base64.b64encode((self.username + ":" + secret).encode()).decode()
         return self.fetch(path, method=method, headers=headers, client=build_opener(), raw=raw)
 
+    def profile_form(self):
+        status, _, html, _ = self.fetch("/humdav/accessinfo/index")
+        self.assertEqual(200, status)
+        form = Forms(html.decode()).containing("include_caldav")
+        self.assertEqual("post", form["method"].lower())
+        self.assertIn("_csrf", form["fields"])
+        return form
+
     def test_ui_and_discovery(self):
         status, _, html, _ = self.fetch("/humdav/admin/index")
         self.assertEqual(200, status)
         self.assertIn(b"EditForm[active]", html)
+        self.assertIn(b"EditForm[include_email]", html)
         status, _, html, _ = self.fetch("/humdav/accessinfo/index")
         self.assertEqual(200, status)
         self.assertEqual(4, html.count(b'data-bs-toggle="tab"'))
@@ -155,12 +164,19 @@ class HttpSmokeTest(unittest.TestCase):
         if self.calendar_enabled:
             self.assertIn(status, (301, 302, 307, 308))
             self.assertIn("checked", self.caldav_checkbox)
+
+    def test_profile_downloads_require_post_and_csrf(self):
         before = self.token_ids()
-        status, _, _, _ = self.fetch("/humdav/accessinfo/mobileconfig?target=invalid")
-        self.assertEqual(400, status)
-        self.assertEqual(before, self.token_ids())
-        status, _, _, _ = self.fetch("/humdav/accessinfo/mobileconfig?target=ios&include_caldav=invalid")
-        self.assertEqual(400, status)
+        path = "/humdav/accessinfo/mobileconfig"
+        for method in ("GET", "HEAD"):
+            status, _, _, _ = self.fetch(path + "?target=ios", method=method)
+            self.assertEqual(404, status)
+        self.assertEqual(400, self.fetch(path, {"target": "ios", "include_caldav": "0"})[0])
+        form = self.profile_form()
+        for overrides in ({"target": "invalid"}, {"include_caldav": "invalid"}, {"_csrf": "invalid"}):
+            fields = dict(form["fields"], target="ios")
+            fields.update(overrides)
+            self.assertEqual(400, self.fetch(form["action"], fields)[0])
         self.assertEqual(before, self.token_ids())
 
     def test_token_lifecycle_and_read_only_carddav(self):
@@ -191,6 +207,21 @@ class HttpSmokeTest(unittest.TestCase):
         self.assertEqual(207, status)
         self.assertIn(b"BEGIN:VCARD", xml)
         ET.fromstring(xml)
+        missing = addressbook + str(uuid.uuid4()) + ".vcf"
+        multiget = ('<c:addressbook-multiget xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:carddav">'
+                    '<d:prop><d:getetag/><c:address-data/></d:prop>'
+                    '<d:href>' + card + '</d:href><d:href>' + missing + '</d:href></c:addressbook-multiget>').encode()
+        status, _, xml, _ = self.dav(addressbook, secret, "REPORT", raw=multiget)
+        self.assertEqual(207, status)
+        self.assertIn(b"BEGIN:VCARD", xml)
+        hrefs = [node.text for node in ET.fromstring(xml).iter("{DAV:}href")]
+        self.assertIn(card, hrefs)
+        self.assertNotIn(missing, hrefs)
+        self.assertEqual(404, self.dav(missing, secret, "GET")[0])
+        other_guid = os.environ.get("HUMDAV_TEST_OTHER_GUID", str(uuid.uuid4()))
+        other_book = "/humdav/remote/addressbooks/" + other_guid + "/allusers/"
+        self.assertEqual(404, self.dav(other_book, secret)[0])
+        self.assertEqual(404, self.dav(other_book, secret, "REPORT", raw=report)[0])
         status, _, html, url = self.fetch("/humdav/accessinfo/token-info?id=" + token_id.decode())
         self.assertEqual(200, status)
         self.assertIn(b"HumDAV &lt;test&gt;&amp;&quot;", html)
@@ -205,7 +236,8 @@ class HttpSmokeTest(unittest.TestCase):
     def test_apple_profiles_provide_working_tokens(self):
         for target in ("ios", "osx"):
             before = self.token_ids()
-            status, headers, content, _ = self.fetch("/humdav/accessinfo/mobileconfig?target=" + target)
+            form = self.profile_form()
+            status, headers, content, _ = self.fetch(form["action"], dict(form["fields"], target=target))
             self.assertEqual(200, status)
             self.assertIn("application/x-apple-aspen-config", headers["Content-Type"])
             self.assertEqual("no-store", headers["Cache-Control"])
@@ -228,13 +260,11 @@ class HttpSmokeTest(unittest.TestCase):
                 self.assertEqual(207, self.dav(caldav["CalDAVPrincipalURL"], caldav["CalDAVPassword"])[0])
 
     def test_caldav_can_be_excluded_from_both_apple_profiles(self):
-        status, _, html, _ = self.fetch("/humdav/accessinfo/index")
-        self.assertEqual(200, status)
-        form = Forms(html.decode()).containing("include_caldav")
+        form = self.profile_form()
         for target in ("ios", "osx"):
             before = self.token_ids()
             fields = dict(form["fields"], target=target, include_caldav="0")
-            status, _, content, _ = self.fetch(form["action"] + "?" + urlencode(fields))
+            status, _, content, _ = self.fetch(form["action"], fields)
             self.assertEqual(200, status)
             new_ids = self.token_ids() - before
             self.assertEqual(1, len(new_ids))

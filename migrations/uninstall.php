@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -11,18 +12,21 @@ use humhub\components\Migration;
 /**
  * Class uninstall
  */
-class uninstall extends Migration {
+class uninstall extends Migration
+{
     /**
      * {@inheritdoc}
      */
-    public function safeUp() {
+    public function safeUp()
+    {
         $this->safeDropTable('humdav_user_token');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function safeDown() {
+    public function safeDown()
+    {
         echo "uninstall does not support migration down.\n";
         return false;
     }

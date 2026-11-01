@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * HumHub DAV Access
+ *
+ * @package humhub.modules.humdav
+ * @author KeudellCoding
+ */
+
+/**
  * Run against a disposable copy of an installed HumHub database only.
  */
 $dsn = getenv('HUMDAV_TEST_DB_DSN');

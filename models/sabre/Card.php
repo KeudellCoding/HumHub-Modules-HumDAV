@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -8,11 +9,13 @@
 
 namespace humhub\modules\humdav\models\sabre;
 
-class Card extends \Sabre\CardDAV\Card {
+class Card extends \Sabre\CardDAV\Card
+{
     /**
      * @inheritdoc
      */
-    function getACL() {
+    public function getACL()
+    {
         // An alternative acl may be specified through the cardData array.
         if (isset($this->cardData['acl'])) {
             return $this->cardData['acl'];

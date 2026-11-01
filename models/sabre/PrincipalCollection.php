@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -8,11 +9,13 @@
 
 namespace humhub\modules\humdav\models\sabre;
 
-class PrincipalCollection extends \Sabre\DAVACL\PrincipalCollection {
+class PrincipalCollection extends \Sabre\DAVACL\PrincipalCollection
+{
     /**
      * @inheritdoc
      */
-    function getChildForPrincipal(array $principal) {
+    public function getChildForPrincipal(array $principal)
+    {
         return new Principal($this->principalBackend, $principal);
     }
 }

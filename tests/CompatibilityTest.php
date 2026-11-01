@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * HumHub DAV Access
+ *
+ * @package humhub.modules.humdav
+ * @author KeudellCoding
+ */
+
 use humhub\modules\humdav\components\MobileConfig;
 use humhub\modules\humdav\components\sabre\AuthenticationBackend;
 use humhub\modules\humdav\definitions\VCardDefinitions;
@@ -161,8 +168,11 @@ final class CompatibilityTest extends TestCase
 
     public function testVCard40SupportsBirthdaysWithoutAYear(): void
     {
+        Yii::$app->getModule('humdav')->settings->set('include_birthday', true);
+        humhub\modules\user\models\ProfileField::updateAll(['visible' => 1], ['internal_name' => 'birthday']);
         $this->user->profile->birthday = '1980-02-29';
         $this->user->profile->birthday_hide_year = 1;
+        self::assertTrue($this->user->profile->save(false));
         $card = VCardDefinitions::getVCard($this->user, $this->user);
         self::assertNotNull($card);
         $parsed = Reader::read($card);

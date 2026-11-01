@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -16,8 +17,10 @@ use humhub\modules\humdav\models\UserToken;
 use humhub\modules\ui\menu\MenuLink;
 use humhub\modules\user\models\User;
 
-class Events {
-    public static function onBeforeRequest($event) {
+class Events
+{
+    public static function onBeforeRequest($event)
+    {
         if (!StringHelper::startsWith(Yii::$app->request->pathInfo, 'humdav/')
             && Yii::$app->request->pathInfo !== '.well-known/carddav') {
             return;
@@ -25,8 +28,9 @@ class Events {
 
         Yii::$app->urlManager->addRules(RouteDefinitions::getDefinitions(), true);
     }
-    
-    public static function onTopMenuInit($event) {
+
+    public static function onTopMenuInit($event)
+    {
         try {
             $settings = Yii::$app->getModule('humdav')->settings;
             if ((bool)$settings->get('active', false) !== true) {
@@ -44,7 +48,7 @@ class Events {
             if (!in_array($currentIdentity->guid, $allowedUsers) && !empty($allowedUsers)) {
                 return;
             }
-            
+
             $event->sender->addEntry(new MenuLink([
                 'label' => 'HumDAV',
                 'url' => Url::to(['/humdav/accessinfo/index']),
@@ -60,20 +64,8 @@ class Events {
         }
     }
 
-    public static function onAfterUpdate($event) {
-        if ($event->moduleId === 'humdav'){
-            try {
-                $settings = Yii::$app->getModule('humdav')->settings;
-                if ($settings->get('instruction_location') === 'directory_menu' && version_compare(Yii::$app->version, '1.9.0', 'ge')) {
-                    $settings->set('instruction_location', 'top_menu');
-                }
-            } catch (\Throwable $e) {
-                Yii::error($e);
-            }
-        }
-    }
-
-    public static function onIntegrityCheck($event) {
+    public static function onIntegrityCheck($event)
+    {
         try {
             $integrityController = $event->sender;
 
@@ -99,7 +91,8 @@ class Events {
         }
     }
 
-    public static function onUserDelete($event) {
+    public static function onUserDelete($event)
+    {
         try {
             foreach (UserToken::findAll(['user_id' => $event->sender->id]) as $userToken) {
                 $userToken->delete();
@@ -109,7 +102,8 @@ class Events {
         }
     }
 
-    public static function onUserUpdate($event) {
+    public static function onUserUpdate($event)
+    {
         if ($event->sender->status !== User::STATUS_ENABLED) {
             self::onUserDelete($event);
         }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -8,7 +9,7 @@
 
 namespace humhub\modules\humdav\controllers;
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use Yii;
 use humhub\components\Response;
@@ -23,7 +24,8 @@ use yii\web\HttpException;
 use Sabre\DAV\Server;
 use yii\helpers\Url;
 
-class RemoteController extends Controller {
+class RemoteController extends Controller
+{
     /**
      * @inheritdoc
      */
@@ -38,7 +40,8 @@ class RemoteController extends Controller {
     /**
      * @inheritdoc
      */
-    public function beforeAction($action) {
+    public function beforeAction($action)
+    {
         Yii::$app->response->clear();
         Yii::$app->response->format = Response::FORMAT_RAW;
         Yii::$app->request->setBodyParams([]);
@@ -46,16 +49,17 @@ class RemoteController extends Controller {
         Yii::$app->user->enableAutoLogin = false;
         Yii::$app->user->setIdentity(null);
         $this->layout = false;
-        
+
         $settings = Yii::$app->getModule('humdav')->settings;
         if ((bool)$settings->get('active', false) !== true) {
-            throw new HttpException(403, 'Module not activated');
+            throw new HttpException(403, Yii::t('HumdavModule.base', 'Module not activated'));
         }
-        
+
         return parent::beforeAction($action);
     }
 
-    public function actionIndex() {
+    public function actionIndex()
+    {
         $settings = Yii::$app->getModule('humdav')->settings;
 
         //Backends
@@ -66,7 +70,7 @@ class RemoteController extends Controller {
         // Setting up the directory tree
         $nodes = [
             new PrincipalCollection($principalBackend),
-            new AddressBookRoot($principalBackend, $cardDavBackend)
+            new AddressBookRoot($principalBackend, $cardDavBackend),
         ];
 
 
@@ -87,12 +91,13 @@ class RemoteController extends Controller {
         if ((bool)$settings->get('enable_browser_plugin', false) === true) {
             $server->addPlugin(new \Sabre\DAV\Browser\Plugin());
         }
-        
+
         $server->start();
         exit(0);
     }
 
-    public function actionDiscovery() {
+    public function actionDiscovery()
+    {
         return $this->redirect(rtrim(Url::to(['/humdav/remote']), '/') . '/', 301);
     }
 

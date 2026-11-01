@@ -3,7 +3,9 @@
 .DS_Store export-ignore
 ._* export-ignore
 __MACOSX export-ignore
-composer.* export-ignore
+vendor/sabre/dav/bin export-ignore
+vendor/bin export-ignore
+.php-cs-fixer* export-ignore
 test export-ignore
 tests export-ignore
 phpunit.xml* export-ignore

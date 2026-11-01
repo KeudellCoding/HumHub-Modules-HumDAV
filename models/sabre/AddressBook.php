@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -8,24 +9,27 @@
 
 namespace humhub\modules\humdav\models\sabre;
 
-class AddressBook extends \Sabre\CardDAV\AddressBook {
+class AddressBook extends \Sabre\CardDAV\AddressBook
+{
     /**
      * @inheritdoc
      */
-    function getACL() {
+    public function getACL()
+    {
         return [
             [
                 'privilege' => '{DAV:}read',
                 'principal' => '{DAV:}owner',
-                'protected' => true
-            ]
+                'protected' => true,
+            ],
         ];
     }
 
     /**
      * @inheritdoc
      */
-    function getChildACL() {
+    public function getChildACL()
+    {
         return [
             [
                 'privilege' => '{DAV:}read',
@@ -35,13 +39,17 @@ class AddressBook extends \Sabre\CardDAV\AddressBook {
         ];
     }
 
-    function getChild($name) {
+    public function getChild($name)
+    {
         $obj = $this->carddavBackend->getCard($this->addressBookInfo['id'], $name);
-        if (!$obj) throw new \Sabre\DAV\Exception\NotFound('Card not found');
+        if (!$obj) {
+            throw new \Sabre\DAV\Exception\NotFound('Card not found');
+        }
         return new Card($this->carddavBackend, $this->addressBookInfo, $obj);
     }
 
-    function getChildren() {
+    public function getChildren()
+    {
         $objs = $this->carddavBackend->getCards($this->addressBookInfo['id']);
         $children = [];
         foreach ($objs as $obj) {
@@ -51,7 +59,8 @@ class AddressBook extends \Sabre\CardDAV\AddressBook {
         return $children;
     }
 
-    function getMultipleChildren(array $paths) {
+    public function getMultipleChildren(array $paths)
+    {
         $objs = $this->carddavBackend->getMultipleCards($this->addressBookInfo['id'], $paths);
         $children = [];
         foreach ($objs as $obj) {

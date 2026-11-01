@@ -4,6 +4,12 @@ Changelog
 1.6.0 (October 31, 2026)
 ----------------------
 - Chng: Require HumHub 1.19 and PHP 8.2 or newer.
+- Fix: Respect the requesting user's ViewAboutPage permission and profile-field visibility in every vCard; make e-mail export opt-in and require a visible E-mail profile field, including in DAV principal metadata.
+- Chng: Disable optional contact data exports by default and document external copies of exported data.
+- Fix: Require CSRF-protected POST requests for Apple profile downloads; GET requests no longer create device tokens.
+- Fix: Return 404 for another user's address books and batch single/multiget contact lookups without rebuilding the entire book.
+- Chng: Describe the read-only CardDAV scope, split overview/manual/installation documentation, include Composer manifests in releases, and exclude SabreDAV command-line tools.
+- Enh: Make UI messages translatable, remove obsolete update and UUID code, and apply HumHub's PHP coding style.
 - Chng: Remove HumDAV's own CalDAV server and iCal subscriptions; use the Calendar module's native calendar services instead. Existing HumDAV calendar URLs no longer work.
 - Chng: Migrate tokens to CardDAV only, delete obsolete iCal and other non-DAV tokens, and remove the "Used for" field. Existing CardDAV credentials remain valid.
 - Enh: Include native Calendar CalDAV credentials and principal URLs in Apple profiles through an enabled-by-default checkbox. CardDAV is always included.

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -8,24 +9,27 @@
 
 namespace humhub\modules\humdav\models\sabre;
 
-class AddressBookHome extends \Sabre\CardDAV\AddressBookHome {
+class AddressBookHome extends \Sabre\CardDAV\AddressBookHome
+{
     /**
      * @inheritdoc
      */
-    function getACL() {
+    public function getACL()
+    {
         return [
             [
                 'privilege' => '{DAV:}read',
                 'principal' => '{DAV:}owner',
-                'protected' => true
-            ]
+                'protected' => true,
+            ],
         ];
     }
 
     /**
      * @inheritdoc
      */
-    function getChildren() {
+    public function getChildren()
+    {
         $addressbooks = $this->carddavBackend->getAddressBooksForUser($this->principalUri);
         $objs = [];
         foreach ($addressbooks as $addressbook) {

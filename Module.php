@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -10,16 +11,18 @@ namespace humhub\modules\humdav;
 
 use yii\helpers\Url;
 
-class Module extends \humhub\components\Module {
+class Module extends \humhub\components\Module
+{
     /**
      * @inheritdoc
      */
     public $resourcesPath = 'resources';
-    
+
     /**
      * @inheritdoc
      */
-    public function getConfigUrl() {
+    public function getConfigUrl()
+    {
         return Url::to(['/humdav/admin/index']);
     }
 }

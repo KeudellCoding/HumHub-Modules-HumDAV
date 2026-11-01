@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -14,36 +15,41 @@ use humhub\libs\UUID;
 use humhub\modules\user\models\User;
 use Yii;
 
-class UserToken extends ActiveRecord {
+class UserToken extends ActiveRecord
+{
     public $defaultAlgorithm = '';
 
     /**
      * {@inheritdoc}
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'humdav_user_token';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function init() {
+    public function init()
+    {
         parent::init();
 
         $this->defaultAlgorithm = 'sha1md5';
         if (function_exists('hash_algos')) {
             $algos = hash_algos();
-            if (in_array('sha512', $algos) && in_array('whirlpool', $algos))
+            if (in_array('sha512', $algos) && in_array('whirlpool', $algos)) {
                 $this->defaultAlgorithm = 'sha512whirlpool';
-            elseif (in_array('sha512', $algos))
+            } elseif (in_array('sha512', $algos)) {
                 $this->defaultAlgorithm = 'sha512';
+            }
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function beforeSave($insert) {
+    public function beforeSave($insert)
+    {
         if ($insert) {
             $this->created_at = date('Y-m-d H:i:s');
             $this->created_by_ip = Yii::$app->request->getUserIP();
@@ -52,21 +58,23 @@ class UserToken extends ActiveRecord {
 
         return parent::beforeSave($insert);
     }
-    
+
     /**
      * {@inheritdoc}
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['user_id'], 'integer'],
             [['algorithm'], 'string', 'max' => 20],
             [['name'], 'string', 'max' => 255],
             [['token', 'salt'], 'string'],
-            [['user_id', 'name', 'algorithm', 'token', 'salt'], 'required']
+            [['user_id', 'name', 'algorithm', 'token', 'salt'], 'required'],
         ];
     }
 
-    public function scenarios() {
+    public function scenarios()
+    {
         return [
             self::SCENARIO_DEFAULT => ['name', '!user_id', '!algorithm', '!token', '!salt'],
         ];
@@ -75,20 +83,21 @@ class UserToken extends ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
-            'id' => 'ID',
-            'user_id' => 'User ID',
-            'name' => 'Name',
-            'algorithm' => 'Algorithm',
-            'token' => 'Token',
-            'salt' => 'Salt',
-            'last_time_used' => 'Last Time Used',
-            'last_time_used_by_ip' => 'Last Time Used by IP',
-            'last_time_used_by_user_agent' => 'Last Time Used by User Agent',
-            'created_at' => 'Created At',
-            'created_by_ip' => 'Created by IP',
-            'created_by_user_agent' => 'Created by User Agent'
+            'id' => Yii::t('HumdavModule.base', 'ID'),
+            'user_id' => Yii::t('HumdavModule.base', 'User ID'),
+            'name' => Yii::t('HumdavModule.base', 'Name'),
+            'algorithm' => Yii::t('HumdavModule.base', 'Algorithm'),
+            'token' => Yii::t('HumdavModule.base', 'Token'),
+            'salt' => Yii::t('HumdavModule.base', 'Salt'),
+            'last_time_used' => Yii::t('HumdavModule.base', 'Last Time Used'),
+            'last_time_used_by_ip' => Yii::t('HumdavModule.base', 'Last Time Used by IP'),
+            'last_time_used_by_user_agent' => Yii::t('HumdavModule.base', 'Last Time Used by User Agent'),
+            'created_at' => Yii::t('HumdavModule.base', 'Created At'),
+            'created_by_ip' => Yii::t('HumdavModule.base', 'Created by IP'),
+            'created_by_user_agent' => Yii::t('HumdavModule.base', 'Created by User Agent'),
         ];
     }
 
@@ -98,7 +107,8 @@ class UserToken extends ActiveRecord {
      * @param string $token
      * @return string Hashed token
      */
-    private function hashToken($token) {
+    private function hashToken($token)
+    {
         $token .= $this->salt;
 
         switch ($this->algorithm) {
@@ -108,7 +118,7 @@ class UserToken extends ActiveRecord {
                 return hash('sha512', hash('whirlpool', $token));
             case 'sha512':
                 return hash('sha512', $token);
-            
+
             default:
                 throw new Exception('Invalid Hashing Algorithm!');
         }
@@ -119,7 +129,8 @@ class UserToken extends ActiveRecord {
      *
      * @return null|string The token if successful, otherwise null
      */
-    public function generateToken() {
+    public function generateToken()
+    {
         $newToken = UUID::v4();
         return $this->setToken($newToken) ? $newToken : null;
     }
@@ -127,9 +138,10 @@ class UserToken extends ActiveRecord {
     /**
      * Sets a token and hash it
      *
-     * @return boolean Success
+     * @return bool Success
      */
-    public function setToken(string $newToken) {
+    public function setToken(string $newToken)
+    {
         if (!empty($this->token)) {
             return false;
         }
@@ -141,31 +153,39 @@ class UserToken extends ActiveRecord {
         return true;
     }
 
-    public function updateLastTimeUsed() {
+    public function updateLastTimeUsed()
+    {
         $this->last_time_used = date('Y-m-d H:i:s');
         $this->last_time_used_by_ip = Yii::$app->request->getUserIP();
         $this->last_time_used_by_user_agent = Yii::$app->request->getUserAgent();
     }
 
-    public function getUser() {
+    public function getUser()
+    {
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
-    public function canEdit() {
+    public function canEdit()
+    {
         return $this->user_id === Yii::$app->user->id;
     }
 
-    public static function validateTokenForUser(User $user, string $token) {
+    public static function validateTokenForUser(User $user, string $token)
+    {
         $settings = Yii::$app->getModule('humdav')->settings;
-        if ((bool)$settings->get('active', false) !== true) return false;
+        if ((bool)$settings->get('active', false) !== true) {
+            return false;
+        }
         $allowedUsers = array_filter((array)$settings->getSerialized('enabled_users'));
-        if (!in_array($user->guid, $allowedUsers) && !empty($allowedUsers)) return false;
+        if (!in_array($user->guid, $allowedUsers) && !empty($allowedUsers)) {
+            return false;
+        }
 
         $tokens = UserToken::find()
             ->joinWith('user')
             ->where([
                 'user_id' => $user->id,
-                'user.status' => User::STATUS_ENABLED
+                'user.status' => User::STATUS_ENABLED,
             ])->all();
 
         foreach ($tokens as $userToken) {

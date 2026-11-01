@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * HumHub DAV Access
+ *
+ * @package humhub.modules.humdav
+ * @author KeudellCoding
+ */
+
 namespace humhub\modules\humdav\components;
 
 use humhub\modules\user\models\User;
@@ -12,8 +19,10 @@ use yii\helpers\Url;
 /**
  * Builds Apple configuration profiles without emitting headers or storing tokens.
  */
-final class MobileConfig {
-    public static function build(User $user, string $token, string $target, bool $includeCalDav = true): string {
+final class MobileConfig
+{
+    public static function build(User $user, string $token, string $target, bool $includeCalDav = true): string
+    {
         if (!in_array($target, ['ios', 'osx'], true)) {
             throw new InvalidArgumentException('Unsupported configuration profile target.');
         }
@@ -46,7 +55,7 @@ final class MobileConfig {
                 $protocol . 'UseSSL' => Yii::$app->request->isSecureConnection,
                 $protocol . 'Username' => $user->username,
                 $protocol . 'Password' => $account['password'],
-                'PayloadDescription' => $protocol . ' Configuration',
+                'PayloadDescription' => Yii::t('HumdavModule.base', '{protocol} Configuration', ['protocol' => $protocol]),
                 'PayloadDisplayName' => $user->username . ' ' . $protocol,
                 'PayloadIdentifier' => 'com.humdav.setup.' . strtolower($protocol) . '.' . $payloadId,
                 'PayloadOrganization' => '',
@@ -64,8 +73,8 @@ final class MobileConfig {
         $writer->writeAttribute('version', '1.0');
         self::writeValue($writer, [
             'PayloadContent' => $payloads,
-            'PayloadDescription' => 'Configuration profiles for the resources of the HumHub page ' . $name . '.',
-            'PayloadDisplayName' => $name . ' HumDAV Configuration',
+            'PayloadDescription' => Yii::t('HumdavModule.base', 'Configuration profiles for the resources of the HumHub page {network}.', ['network' => $name]),
+            'PayloadDisplayName' => Yii::t('HumdavModule.base', '{network} HumDAV Configuration', ['network' => $name]),
             'PayloadIdentifier' => 'com.humdav.setup.' . $id,
             'PayloadOrganization' => '',
             'PayloadRemovalDisallowed' => false,
@@ -79,7 +88,8 @@ final class MobileConfig {
         return $writer->outputMemory();
     }
 
-    private static function writeValue(XMLWriter $writer, mixed $value): void {
+    private static function writeValue(XMLWriter $writer, mixed $value): void
+    {
         if (is_array($value)) {
             $isList = array_is_list($value);
             $writer->startElement($isList ? 'array' : 'dict');

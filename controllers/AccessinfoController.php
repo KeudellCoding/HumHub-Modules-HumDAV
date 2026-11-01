@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -21,30 +22,33 @@ use yii\web\ForbiddenHttpException;
 use yii\web\GoneHttpException;
 use yii\web\ServerErrorHttpException;
 
-class AccessinfoController extends Controller {
+class AccessinfoController extends Controller
+{
     /**
      * @inheritdoc
      */
-    public function beforeAction($action) {
+    public function beforeAction($action)
+    {
         $currentIdentity = Yii::$app->user->identity;
         if ($currentIdentity === null || Yii::$app->user->isGuest) {
-            throw new ForbiddenHttpException('You\'re not signed in.');
+            throw new ForbiddenHttpException(Yii::t('HumdavModule.base', 'You\'re not signed in.'));
         }
-        
+
         $settings = Yii::$app->getModule('humdav')->settings;
         if ((bool)$settings->get('active', false) !== true) {
-            throw new NotFoundHttpException('Module not activated');
+            throw new NotFoundHttpException(Yii::t('HumdavModule.base', 'Module not activated'));
         }
-        
+
         $allowedUsers = array_filter((array)$settings->getSerialized('enabled_users'));
         if (!in_array($currentIdentity->guid, $allowedUsers) && !empty($allowedUsers)) {
-            throw new ForbiddenHttpException('You\'re not allowed to enter this page.');
+            throw new ForbiddenHttpException(Yii::t('HumdavModule.base', 'You\'re not allowed to enter this page.'));
         }
 
         return parent::beforeAction($action);
     }
 
-    public function actionIndex() {
+    public function actionIndex()
+    {
         $userSettingsForm = new UserSettingsEditForm();
         if ($userSettingsForm->load(Yii::$app->request->post()) && $userSettingsForm->validate() && $userSettingsForm->save()) {
             $this->view->saved();
@@ -67,10 +71,15 @@ class AccessinfoController extends Controller {
         ]);
     }
 
-    public function actionTokenInfo($id) {
+    public function actionTokenInfo($id)
+    {
         $userToken = UserToken::findOne($id);
-        if ($userToken === null) throw new NotFoundHttpException();
-        if (!$userToken->canEdit()) throw new ForbiddenHttpException();
+        if ($userToken === null) {
+            throw new NotFoundHttpException();
+        }
+        if (!$userToken->canEdit()) {
+            throw new ForbiddenHttpException();
+        }
 
         if ($userToken->load(Yii::$app->request->post()) && $userToken->validate() && $userToken->save()) {
             $this->view->saved();
@@ -80,74 +89,83 @@ class AccessinfoController extends Controller {
         return $this->render('TokenInfo', ['userToken' => $userToken]);
     }
 
-    public function actionRevokeToken($id) {
+    public function actionRevokeToken($id)
+    {
         $userToken = UserToken::findOne($id);
-        if ($userToken === null) throw new NotFoundHttpException();
-        if (!$userToken->canEdit()) throw new ForbiddenHttpException();
+        if ($userToken === null) {
+            throw new NotFoundHttpException();
+        }
+        if (!$userToken->canEdit()) {
+            throw new ForbiddenHttpException();
+        }
 
-        if(Yii::$app->request->post('revoke-token-action') == 'revoke' && $userToken->delete()) {
-            $this->view->info('The token has been revoked.');
+        if (Yii::$app->request->post('revoke-token-action') == 'revoke' && $userToken->delete()) {
+            $this->view->info(Yii::t('HumdavModule.base', 'The token has been revoked.'));
             return $this->redirect(Url::to(['index']));
         }
 
         return $this->render('RevokeToken', ['userToken' => $userToken]);
     }
 
-    public function actionGenerateToken() {
+    public function actionGenerateToken()
+    {
         if (Yii::$app->request->isPost) {
             $attributes = Yii::$app->session->getFlash('newCardDavToken', null, true);
             if (!is_array($attributes) || (int)($attributes['user_id'] ?? 0) !== (int)Yii::$app->user->id) {
-                throw new GoneHttpException('This token form has expired. Please generate a new token.');
+                throw new GoneHttpException(Yii::t('HumdavModule.base', 'This token form has expired. Please generate a new token.'));
             }
             $newUserToken = new UserToken($attributes);
-            
-            if ($newUserToken->load(Yii::$app->request->post()) && $newUserToken->validate() && $newUserToken->save())
+
+            if ($newUserToken->load(Yii::$app->request->post()) && $newUserToken->validate() && $newUserToken->save()) {
                 $this->view->saved();
-            else
-                $this->view->info('The token could not be saved.');
-            
+            } else {
+                $this->view->info(Yii::t('HumdavModule.base', 'The token could not be saved.'));
+            }
+
             return $this->redirect(Url::to(['index']));
-        }
-        else if (Yii::$app->request->isGet) {
+        } elseif (Yii::$app->request->isGet) {
             $newUserToken = new UserToken();
             $newUserToken->user_id = Yii::$app->user->identity->id;
-            $newUserToken->name = 'New Token';
+            $newUserToken->name = Yii::t('HumdavModule.base', 'New Token');
             $token = $newUserToken->generateToken();
-            if (empty($token)) throw new BadRequestHttpException('Cannot generate a token.');
+            if (empty($token)) {
+                throw new BadRequestHttpException(Yii::t('HumdavModule.base', 'Cannot generate a token.'));
+            }
             Yii::$app->session->setFlash('newCardDavToken', $newUserToken->getAttributes());
 
             return $this->render('GenerateToken', [
                 'userToken' => $newUserToken,
-                'token' => $token
+                'token' => $token,
             ]);
         }
-        
+
         throw new BadRequestHttpException();
     }
 
-    public function actionMobileconfig() {
-        $target = Yii::$app->request->get('target');
+    public function actionMobileconfig()
+    {
+        $target = Yii::$app->request->post('target');
         if (!in_array($target, ['ios', 'osx'], true)) {
-            throw new BadRequestHttpException('Unsupported configuration profile target.');
+            throw new BadRequestHttpException(Yii::t('HumdavModule.base', 'Unsupported configuration profile target.'));
         }
 
-        $includeCalDav = Yii::$app->request->get('include_caldav', '1');
+        $includeCalDav = Yii::$app->request->post('include_caldav', '1');
         if (!in_array($includeCalDav, ['0', '1'], true)) {
-            throw new BadRequestHttpException('Invalid CalDAV configuration option.');
+            throw new BadRequestHttpException(Yii::t('HumdavModule.base', 'Invalid CalDAV configuration option.'));
         }
 
         $user = Yii::$app->user->identity;
         $userToken = new UserToken();
         $userToken->user_id = $user->id;
-        $userToken->name = 'Token for ' . $target;
+        $userToken->name = Yii::t('HumdavModule.base', 'Token for {target}', ['target' => $target]);
         $token = $userToken->generateToken();
         if ($token === null) {
-            throw new ServerErrorHttpException('Cannot generate a token.');
+            throw new ServerErrorHttpException(Yii::t('HumdavModule.base', 'Cannot generate a token.'));
         }
 
         $content = MobileConfig::build($user, $token, $target, $includeCalDav === '1');
         if (!$userToken->save()) {
-            throw new ServerErrorHttpException('Cannot save the configuration profile token.');
+            throw new ServerErrorHttpException(Yii::t('HumdavModule.base', 'Cannot save the configuration profile token.'));
         }
 
         $response = Yii::$app->response->sendContentAsFile($content, 'humdav-profile.mobileconfig', [

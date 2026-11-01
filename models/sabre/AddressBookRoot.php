@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -8,30 +9,38 @@
 
 namespace humhub\modules\humdav\models\sabre;
 
+use Sabre\DAV\Exception\NotFound;
 use Sabre\DAVACL\ACLTrait;
 use Sabre\DAVACL\IACL;
+use Yii;
 
-class AddressBookRoot extends \Sabre\CardDAV\AddressBookRoot implements IACL {
-    
+class AddressBookRoot extends \Sabre\CardDAV\AddressBookRoot implements IACL
+{
     use ACLTrait;
 
     /**
      * @inheritdoc
      */
-    function getACL() {
+    public function getACL()
+    {
         return [
             [
                 'privilege' => '{DAV:}read',
                 'principal' => '{DAV:}authenticated',
-                'protected' => true
-            ]
+                'protected' => true,
+            ],
         ];
     }
 
     /**
      * @inheritdoc
      */
-    function getChildForPrincipal(array $principal) {
+    public function getChildForPrincipal(array $principal)
+    {
+        $user = Yii::$app->user->getIdentity();
+        if ($user === null || $principal['uri'] !== 'principals/' . $user->guid) {
+            throw new NotFound('Address book not found');
+        }
         return new AddressBookHome($this->carddavBackend, $principal['uri']);
     }
 }

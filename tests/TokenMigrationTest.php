@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * HumHub DAV Access
+ *
+ * @package humhub.modules.humdav
+ * @author KeudellCoding
+ */
+
 use humhub\modules\humdav\models\UserToken;
 use humhub\modules\user\models\User;
 use PHPUnit\Framework\TestCase;

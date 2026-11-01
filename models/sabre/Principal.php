@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -8,17 +9,19 @@
 
 namespace humhub\modules\humdav\models\sabre;
 
-class Principal extends \Sabre\DAVACL\Principal {
+class Principal extends \Sabre\DAVACL\Principal
+{
     /**
      * @inheritdoc
      */
-    function getACL() {
+    public function getACL()
+    {
         return [
             [
                 'privilege' => '{DAV:}read',
                 'principal' => '{DAV:}owner',
                 'protected' => true,
-            ]
+            ],
         ];
     }
 }

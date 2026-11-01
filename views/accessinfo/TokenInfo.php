@@ -16,12 +16,12 @@ use yii\helpers\Url;
     <div class="row">
         <div class="col-md-12">
             <div class="panel">
-                <div class="panel-heading"><i class="fa far fa-address-card"></i> <span><strong>HumDAV</strong> Token Info</span></div>
+                <div class="panel-heading"><i class="fa far fa-address-card"></i> <span><strong>HumDAV</strong> <?= Yii::t('HumdavModule.base', 'Token Info') ?></span></div>
                 <div class="panel-body">
                     <?php $form = ActiveForm::begin(); ?>
 
                     <?= $form->field($userToken, 'name')->textInput() ?>
-                    
+
                     <dl>
                         <dt><?= $userToken->getAttributeLabel('last_time_used') ?>:</dt>
                         <dd><?= Html::encode($userToken->last_time_used ?? '-') ?></dd>
@@ -41,9 +41,9 @@ use yii\helpers\Url;
                         <dt><?= $userToken->getAttributeLabel('created_by_user_agent') ?>:</dt>
                         <dd><?= Html::encode($userToken->created_by_user_agent) ?></dd>
                     </dl>
-                    
+
                     <?= Html::submitButton("Save and back", ['class' => 'btn btn-primary', 'data-ui-loader' => '']) ?>
-                    <a class="btn btn-secondary" href="<?= Url::to(['index']); ?>">Back</a>
+                    <a class="btn btn-secondary" href="<?= Url::to(['index']); ?>"><?= Yii::t('HumdavModule.base', 'Back') ?></a>
                     <?php ActiveForm::end(); ?>
                 </div>
             </div>

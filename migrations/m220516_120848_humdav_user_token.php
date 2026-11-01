@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HumHub DAV Access
  *
@@ -11,11 +12,13 @@ use humhub\components\Migration;
 /**
  * Class m220516_120848_humdav_user_token
  */
-class m220516_120848_humdav_user_token extends Migration {
+class m220516_120848_humdav_user_token extends Migration
+{
     /**
      * {@inheritdoc}
      */
-    public function safeUp() {
+    public function safeUp()
+    {
         $this->safeCreateTable('humdav_user_token', [
             'id' => $this->primaryKey()->notNull(),
             'user_id' => $this->integer()->notNull(),
@@ -29,7 +32,7 @@ class m220516_120848_humdav_user_token extends Migration {
             'last_time_used_by_user_agent' => $this->string(),
             'created_at' => $this->dateTime()->notNull(),
             'created_by_ip' => $this->string()->notNull(),
-            'created_by_user_agent' => $this->string()->notNull()
+            'created_by_user_agent' => $this->string()->notNull(),
         ]);
 
         $this->safeAddForeignKey('fk_humdav_user_token_user_id', 'humdav_user_token', 'user_id', 'user', 'id', 'CASCADE', 'CASCADE');
@@ -38,7 +41,8 @@ class m220516_120848_humdav_user_token extends Migration {
     /**
      * {@inheritdoc}
      */
-    public function safeDown() {
+    public function safeDown()
+    {
         $this->safeDropTable('humdav_user_token');
     }
 }
