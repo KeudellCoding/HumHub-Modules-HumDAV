@@ -138,6 +138,7 @@ class VCardDefinitions
             return null;
         }
 
+        # Check field visibility and return the e-mail address if a visible e-mail profile field is found.
         $visibleProfileFields ??= $user->profile->getProfileFields();
         foreach ($visibleProfileFields as $field) {
             if ($field->visible && $field->getFieldType() instanceof UserEmail) {
