@@ -81,7 +81,7 @@ class EditForm extends Model
             'instruction_location' => Yii::t('HumdavModule.base', 'Menu location'),
             'instruction_location_sort_order' => Yii::t('HumdavModule.base', 'Menu sort order'),
             'enabled_users' => Yii::t('HumdavModule.base', 'Allowed users'),
-            'enable_password_auth' => Yii::t('HumdavModule.base', 'Activate the password authentication (not recommended)'),
+            'enable_password_auth' => Yii::t('HumdavModule.base', 'Also allow HumHub account passwords for CardDAV (not recommended)'),
             'include_email' => Yii::t('HumdavModule.base', 'Export e-mail addresses'),
             'include_address' => Yii::t('HumdavModule.base', 'Export postal addresses'),
             'include_profile_image' => Yii::t('HumdavModule.base', 'Export profile images'),
@@ -101,7 +101,10 @@ class EditForm extends Model
     {
         $result = [
             'enabled_users' => Yii::t('HumdavModule.base', 'If empty, all users have access.'),
-            'enable_password_auth' => Yii::t('HumdavModule.base', 'The token authentication works independently of the authentication with the user password.'),
+            'enable_password_auth' => Yii::t(
+                'HumdavModule.base',
+                'The token authentication works independently of the authentication with the user password. It is recommended to use a separate token for each device or app. Tokens grant CardDAV access only and can be revoked individually. Signing in to CardDAV with a HumHub account password bypasses HumHub\'s two-factor authentication and login brute-force protection.',
+            ),
         ];
 
         return $result;

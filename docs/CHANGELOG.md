@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.6.1 (November 20, 2026)
+------------------------
+- Chng: Recommend revocable CardDAV tokens and warn that using a HumHub account password for CardDAV bypasses HumHub's two-factor authentication and login brute-force protection.
+- Enh: Add an admin page message with a GitHub link for bug reports and feature requests.
+
 1.6.0 (October 31, 2026)
 ----------------------
 - Chng: Require HumHub 1.19 and PHP 8.2 or newer.

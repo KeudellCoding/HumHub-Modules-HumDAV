@@ -3,7 +3,7 @@
     "name": "HumHub DAV Access",
     "description": "Read-only CardDAV contacts for mobile devices.",
     "keywords": ["carddav", "contacts", "addressbook", "synchronization", "mobile", "webdav", "dav", "sabre"],
-    "version": "1.6.0",
+    "version": "1.6.1",
     "humhub": {
         "minVersion": "1.19"
     },

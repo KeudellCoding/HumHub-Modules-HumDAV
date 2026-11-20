@@ -12,6 +12,8 @@ use humhub\widgets\form\ActiveForm;
 use humhub\modules\user\widgets\UserPickerField;
 use humhub\modules\humdav\models\admin\EditForm;
 
+$homepageUrl = Yii::$app->getModule('humdav')->getHomepageUrl();
+
 ?>
 
 <div class="panel panel-default">
@@ -60,6 +62,17 @@ use humhub\modules\humdav\models\admin\EditForm;
 
         <?= Html::submitButton("Save", ['class' => 'btn btn-primary', 'data-ui-loader' => '']); ?>
         <a class="btn btn-secondary" href="<?= Url::to(['/admin/module']); ?>"><?= Yii::t('HumdavModule.base', 'Back to modules') ?></a>
+
+        <?php if ($homepageUrl): ?>
+            <hr />
+
+            <span><?= Yii::t('HumdavModule.base', 'Found a bug or have a feature request? Support the development on {github} :)', [
+                'github' => Html::a('GitHub', $homepageUrl, [
+                    'target' => '_blank',
+                    'rel' => 'noopener noreferrer',
+                ]),
+            ]) ?></span>
+        <?php endif; ?>
 
         <?php ActiveForm::end(); ?>
     </div>

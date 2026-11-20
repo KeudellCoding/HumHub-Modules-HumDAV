@@ -25,4 +25,9 @@ class Module extends \humhub\components\Module
     {
         return Url::to(['/humdav/admin/index']);
     }
+
+    public function getHomepageUrl(): ?string
+    {
+        return $this->getModuleInfo()['homepage'] ?? null;
+    }
 }
