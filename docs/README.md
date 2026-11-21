@@ -7,3 +7,4 @@ Personal fields respect the requesting user's **View your about page** permissio
 - [Installation, requirements and upgrades](INSTALLATION.md)
 - [Client setup, address books and exported data](MANUAL.md)
 - [Changelog](CHANGELOG.md)
+- [Licence](LICENCE.md)

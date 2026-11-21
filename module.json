@@ -16,9 +16,9 @@
         }
     ],
     "screenshots": [
-        "admin_settings.png",
-        "user_config.png",
-        "user_mobileconfig.png"
+        "resources/screenshots/admin_settings.png",
+        "resources/screenshots/user_config.png",
+        "resources/screenshots/user_mobileconfig.png"
     ],
     "licence": "Zlib"
 }
